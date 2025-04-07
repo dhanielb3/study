@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://neondb_owner:npg_t9uwZUz4yofb@ep-plain-bush-a5ogzpwi-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Study {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  photo       String
+  certain     Int
+  errors      Int
+  time        Int
+  description String
+  date        DateTime
+  trophs      Int
+  local       String
+  user        User     @relation(fields: [userId], references: [email], onDelete: Cascade)
+}
+
+model Trophs {
+  id     String    @id @default(cuid())
+  userId String
+  date   DateTime?
+  trophs Int
+  user   User      @relation(fields: [userId], references: [email], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String
+  crown         Int
+  accounts      Account[]
+  sessions      Session[]
+  trophs        Trophs[]
+  Study         Study[]
+}
+
+model VerificationToken {
+  id            String    @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
