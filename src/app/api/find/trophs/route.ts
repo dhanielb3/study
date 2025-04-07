@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
+export async function POST() {
 	const startOfToday = new Date();
 	startOfToday.setHours(0, 0, 0, 0);
 

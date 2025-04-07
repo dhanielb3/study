@@ -42,7 +42,7 @@ function limitText(text: string | undefined, maxLength: number = 15): string {
 	return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
 }
 
-export const options = {
+const options = {
 	plugins: {
 		legend: {
 			position: "bottom",

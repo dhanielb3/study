@@ -41,7 +41,7 @@ ChartJS.register(
 	Legend
 );
 
-export const options = {
+const options = {
 	plugins: {
 		legend: {
 			position: "bottom",
