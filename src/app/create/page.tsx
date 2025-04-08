@@ -61,14 +61,8 @@ export default function EstudoForm() {
 				const { latitude, longitude } = coords;
 				setLocation({ latitude, longitude });
 			});
-			setLocationData(true)
 		}
 	}, []);
-
-	
-	if (!locationData) {
-		return <div>Aceite a permissão da localização</div>
-	}
 
 	useEffect(() => {
 		// Fetch data from API if `location` object is set
