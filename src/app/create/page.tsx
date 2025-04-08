@@ -108,7 +108,14 @@ export default function EstudoForm() {
 			errors: wrong,
 			time: totalTime,
 			description: anotacoes,
-			trophs: Math.round(((correct / (correct + wrong + 1)) * correct) / ((totalTime / 60) + 1)*100),
+			trophs: Math.round(
+				(
+				  // Score de eficiência (de 0 a 1)
+				  ((correct / (correct + wrong + 1)) * correct) /
+				  // penalização por tempo em horas (+1 evita divisão por zero)
+				  (totalTime/60 + 1)
+				) * 100
+			  ),
 			local: local?.address?.town + ", " + local?.address?.state,
 		};
 	
