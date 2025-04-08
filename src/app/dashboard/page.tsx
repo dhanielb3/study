@@ -31,6 +31,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import React from "react";
 
 ChartJS.register(
 	CategoryScale,
@@ -688,7 +689,12 @@ export default function Home() {
 														</div>
 														<div className="w-[30vw] h-auto ml-[1vw] mt-[1vh]">
 															<code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-																{description.split("\n").join("<br/>")}
+																{description.split("\n").map((line, i) => (
+																	<React.Fragment key={i}>
+																		{line}
+																		<br />
+																	</React.Fragment>
+																))}
 															</code>
 															<Image
 																src={photo || ""}
