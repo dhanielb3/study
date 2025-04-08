@@ -30,6 +30,8 @@ export default function EstudoForm() {
 	const [anotacoes, setAnotacoes] = useState("");
 	const router = useRouter();
 	const { data: session, status } = useSession();
+	const [locationData, setLocationData] = useState(false)
+
 	const [local, setLocal] = useState<{
 		address: { town: string; state: string };
 	}>();
@@ -59,11 +61,13 @@ export default function EstudoForm() {
 				const { latitude, longitude } = coords;
 				setLocation({ latitude, longitude });
 			});
+			setLocationData(true)
 		}
 	}, []);
 
-	if (!("geolocation" in navigator)) {
-		return <div>Aceite a permissão da localização</div>;
+	
+	if (!location) {
+		return <div>Aceite a permissão da localização</div>
 	}
 
 	useEffect(() => {
@@ -111,7 +115,7 @@ export default function EstudoForm() {
 			time: totalTime,
 			description: anotacoes,
 			trophs: Math.floor(
-				((correct * 100) / (correct + wrong)) * correct * (totalTime/60)
+				(((correct * 100) || 1) / ((correct + wrong) || 1)) * correct * (totalTime/60)
 			),
 			local: local?.address?.town + ", " + local?.address?.state,
 		};
