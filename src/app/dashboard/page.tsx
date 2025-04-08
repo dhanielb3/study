@@ -85,7 +85,7 @@ export default function Home() {
 		{
 			id: string;
 			userId: string;
-			name: string;
+			title: string;
 			photo: string;
 			certain: number;
 			errors: number;
@@ -505,7 +505,7 @@ export default function Home() {
 											.map((activy, id) => {
 												const {
 													userId,
-													name,
+													title,
 													certain,
 													description,
 													errors,
@@ -616,7 +616,7 @@ export default function Home() {
 															dataFormated={formatDate(date)}
 														></Player>
 														<div className="text-left text-2xl ml-[4.5vw] mt-8 ">
-															{name}
+															{title}
 														</div>
 														<div className="ml-[4.5vw] mt-[4vh]">
 															<div className="flex h-5 items-center space-x-4 text-sm">
@@ -688,7 +688,7 @@ export default function Home() {
 														</div>
 														<div className="w-[30vw] h-auto ml-[1vw] mt-[1vh]">
 															<code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-																{description}
+																{description.split("\n").join("<br/>")}
 															</code>
 															<Image
 																src={photo || ""}
