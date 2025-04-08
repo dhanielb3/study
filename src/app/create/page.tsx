@@ -108,9 +108,7 @@ export default function EstudoForm() {
 			errors: wrong,
 			time: totalTime,
 			description: anotacoes,
-			trophs: Math.floor(
-				((((correct * 100)) / (correct + wrong)) || 1) * (correct || 1) * (totalTime/60)
-			),
+			trophs: Math.round(((correct / (correct + wrong + 1)) * correct) / ((totalTime / 60) + 1)*100),
 			local: local?.address?.town + ", " + local?.address?.state,
 		};
 	
