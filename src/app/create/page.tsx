@@ -66,7 +66,7 @@ export default function EstudoForm() {
 	}, []);
 
 	
-	if (!location) {
+	if (!locationData) {
 		return <div>Aceite a permissão da localização</div>
 	}
 
