@@ -30,7 +30,7 @@ export default function EstudoForm() {
 	const [anotacoes, setAnotacoes] = useState("");
 	const router = useRouter();
 	const { data: session, status } = useSession();
-	const [locationData, setLocationData] = useState(false)
+	const [locationData, setLocationData] = useState(false);
 
 	const [local, setLocal] = useState<{
 		address: { town: string; state: string };
@@ -89,16 +89,16 @@ export default function EstudoForm() {
 			now.getSeconds(),
 			now.getMilliseconds()
 		);
-	
+
 		const hours = parseInt(duracaoHoras.toString());
 		const minutes = parseInt(duracaoMinutos.toString());
 		const seconds = parseInt(duracaoSegundos.toString());
-	
+
 		const correct = parseInt(acertos.toString());
 		const wrong = parseInt(erros.toString());
-	
+
 		const totalTime = hours * 60 + minutes + seconds / 60;
-	
+
 		const data = {
 			photo: foto,
 			userId: session?.user?.email,
@@ -108,17 +108,20 @@ export default function EstudoForm() {
 			errors: wrong,
 			time: totalTime,
 			description: anotacoes,
-			trophs: Math.round(
-				(
-				  // Score de eficiência (de 0 a 1)
-				  ((correct / (correct + wrong + 1)) * correct) /
-				  // penalização por tempo em horas (+1 evita divisão por zero)
-				  (totalTime/60 + 1)
-				) * 100
-			  ),
+			trophs: Math.max(
+				1,
+				Math.min(
+					Math.round(
+						(((correct / (correct + wrong + 1)) * correct) /
+							(totalTime / 60 + 1)) *
+							100
+					),
+					(totalTime / 60) * 1000
+				)
+			),
 			local: local?.address?.town + ", " + local?.address?.state,
 		};
-	
+
 		const study = await fetch("/api/create/study", {
 			method: "POST",
 			headers: {
@@ -126,7 +129,7 @@ export default function EstudoForm() {
 			},
 			body: JSON.stringify({ dados: data }),
 		});
-	
+
 		router.push("/dashboard");
 	};
 
