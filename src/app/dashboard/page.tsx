@@ -616,7 +616,7 @@ export default function Home() {
 															dataFormated={formatDate(date)}
 														></Player>
 														<div className="text-left text-2xl ml-[4.5vw] mt-8 ">
-															Estudo
+															{name}
 														</div>
 														<div className="ml-[4.5vw] mt-[4vh]">
 															<div className="flex h-5 items-center space-x-4 text-sm">
@@ -687,6 +687,9 @@ export default function Home() {
 															)}
 														</div>
 														<div className="w-[30vw] h-auto ml-[1vw] mt-[1vh]">
+															<code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
+																{description}
+															</code>
 															<Image
 																src={photo || ""}
 																width={100}
