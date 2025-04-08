@@ -650,7 +650,7 @@ export default function Home() {
 																	Porcentagem
 																	<br />
 																	<h3 className="text-gray-200 font-bold text-3xl">
-																		{Math.floor(percent)}%
+																		{Math.floor(percent) || 0}%
 																	</h3>
 																</div>
 																<Separator orientation="vertical" />
