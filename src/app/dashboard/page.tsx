@@ -235,18 +235,14 @@ export default function Home() {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					where: {
-						userId: {
-							equals: session?.user?.email
-						}
-					},
+					where: {},
 				}),
 			});
 
 			const responseJson = await responseStudyData.json();
 			const jsonStudyData = responseJson.data;
 
-			if (jsonStudyData?.length > 0) {
+			if (jsonStudyData?.length > 0 && await session?.user?.email) {
 				const labels = jsonStudyData.map((item: any, id: number) => id + 1);
 				const horasEstudo = jsonStudyData.map((item: any) =>
 					Math.floor(item.time / 60)
