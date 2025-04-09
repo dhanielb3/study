@@ -242,7 +242,7 @@ export default function Home() {
 			const responseJson = await responseStudyData.json();
 			const jsonStudyData = responseJson.data;
 
-			if (jsonStudyData?.length > 0 && await session?.user?.email) {
+			if (jsonStudyData?.length > 0) {
 				const labels = jsonStudyData.map((item: any, id: number) => id + 1);
 				const horasEstudo = jsonStudyData.map((item: any) =>
 					Math.floor(item.time / 60)
@@ -279,7 +279,7 @@ export default function Home() {
 			setStatusEffect("loaded");
 		}
 		run();
-	}, []);
+	}, [status]);
 
 	if (statusEffect == "loading") {
 		return <div>Loading...</div>;
