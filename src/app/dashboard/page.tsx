@@ -235,7 +235,13 @@ export default function Home() {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					where: {},
+					filter: {
+						where: {
+							userId: {
+								equals: session?.user?.email,
+							},
+						},
+					},
 				}),
 			});
 
@@ -613,7 +619,9 @@ export default function Home() {
 														<Player
 															name={user?.name || "Usuário"}
 															photo={user?.image || ""}
-															local={local.indexOf("undefined") != -1 ? local : ""}
+															local={
+																local.indexOf("undefined") != -1 ? local : ""
+															}
 															dataFormated={formatDate(date)}
 														></Player>
 														<div className="text-left text-2xl ml-[4.5vw] mt-8 ">
