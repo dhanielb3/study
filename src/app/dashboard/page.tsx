@@ -77,7 +77,9 @@ function formatDate(dataISO: string): string {
 
 function limitText(text: string | undefined, maxLength: number = 15): string {
 	if (!text) return "";
-	return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+	return text.length > maxLength
+		? text.slice(0, maxLength).trimEnd() + "..."
+		: text;
 }
 
 export default function Home() {
@@ -218,11 +220,11 @@ export default function Home() {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
-						where: {
-							userId: session?.user?.email,
-						},
-						orderBy: {
-							date: "desc",
+						filter: {
+							where: {
+								userId: session?.user?.email,
+							},
+							orderBy: { date: 'desc' },
 						},
 					}),
 				});
@@ -632,7 +634,7 @@ export default function Home() {
 														<div className="text-left text-2xl ml-[1vw] mt-8 ">
 															{title}
 														</div>
-														<div className="ml-[1.5vw] mt-[4vh]">
+														<div className="ml-[1.5vw] mt-[4vh] mb-[4vh]">
 															<div className="flex h-5 items-center space-x-4 text-sm">
 																<div className="text-center">
 																	Acertos
@@ -722,14 +724,15 @@ export default function Home() {
 																		{line}
 																		<br />
 																	</React.Fragment>
-																))}
+																)) ||
+																	"esta pessoa não é criativa... não coloca nem descrição (nada aqui...)"}
 															</code>
 															<Image
 																src={photo || ""}
 																width={100}
 																height={100}
 																objectFit="contain"
-																className="w-[30vw]"
+																className="w-[30vw] mt-[3vh]"
 																alt=""
 															></Image>
 														</div>
