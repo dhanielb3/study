@@ -240,7 +240,7 @@ export default function Home() {
 			});
 
 			const responseJson = await responseStudyData.json();
-			const jsonStudyData = responseJson.data;
+			const jsonStudyData = responseJson.data.filter((item: any) => item.userId == session?.user?.email);
 
 			if (jsonStudyData?.length > 0) {
 				const labels = jsonStudyData.map((item: any, id: number) => id + 1);
