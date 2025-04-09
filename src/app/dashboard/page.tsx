@@ -613,7 +613,7 @@ export default function Home() {
 														<Player
 															name={user?.name || "Usuário"}
 															photo={user?.image || ""}
-															local={local}
+															local={local.indexOf("undefined") != -1 ? local : ""}
 															dataFormated={formatDate(date)}
 														></Player>
 														<div className="text-left text-2xl ml-[4.5vw] mt-8 ">
@@ -673,7 +673,20 @@ export default function Home() {
 																			</svg>
 																		</span>
 																		<h3 className="text-gray-200 font-bold text-2xl">
-																			{achievements.length}
+																			{Math.max(
+																				1,
+																				Math.min(
+																					Math.round(
+																						(((certain /
+																							(certain + errors + 1)) *
+																							certain) /
+																							(parseInt(time) / 60 + 1)) *
+																							100
+																					),
+																					(parseInt(time) / 60) * 1000
+																				)
+																			)}{" "}
+																			({achievements.length})
 																		</h3>
 																	</div>
 																</div>
