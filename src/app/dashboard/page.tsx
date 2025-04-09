@@ -235,12 +235,16 @@ export default function Home() {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					where: {},
+					where: {
+						userId: {
+							equals: session?.user?.email
+						}
+					},
 				}),
 			});
 
 			const responseJson = await responseStudyData.json();
-			const jsonStudyData = responseJson.data.filter((item: any) => item.userId == session?.user?.email);
+			const jsonStudyData = responseJson.data;
 
 			if (jsonStudyData?.length > 0) {
 				const labels = jsonStudyData.map((item: any, id: number) => id + 1);
