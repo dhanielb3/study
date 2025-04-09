@@ -629,10 +629,10 @@ export default function Home() {
 															}
 															dataFormated={formatDate(date)}
 														></Player>
-														<div className="text-left text-2xl ml-[4.5vw] mt-8 ">
+														<div className="text-left text-2xl ml-[1vw] mt-8 ">
 															{title}
 														</div>
-														<div className="ml-[4.5vw] mt-[4vh]">
+														<div className="ml-[1.5vw] mt-[4vh]">
 															<div className="flex h-5 items-center space-x-4 text-sm">
 																<div className="text-center">
 																	Acertos
@@ -705,11 +705,13 @@ export default function Home() {
 																</div>
 															</div>
 															{achievements.length > 0 && (
-																<div className="ml-[-3.5vw] mr-[1vw] mt-[4vh] flex bg-gray-600 px-6 py-4 rounded-md">
-																	<div className="mr-[1vw]">
+																<div className="mt-[4vh] ml-[-0.5vw] mr-[1vw] flex flex-wrap items-center bg-gray-600 px-6 py-4 rounded-md max-w-full break-words">
+																	<div className="mr-2">
 																		{achievements[0].icon}
 																	</div>
-																	{achievements[0].label}
+																	<span className="text-gray-100">
+																		{achievements[0].label}
+																	</span>
 																</div>
 															)}
 														</div>
