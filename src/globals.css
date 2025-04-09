@@ -46,7 +46,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #ffffff;
+  --background: #0a0a0a;
   --foreground: #171717;
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -85,13 +85,6 @@
   }
   body {
     @apply bg-background text-foreground;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
   }
 }
 
