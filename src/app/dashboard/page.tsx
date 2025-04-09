@@ -672,7 +672,7 @@ export default function Home() {
 																				></path>
 																			</svg>
 																		</span>
-																		<h3 className="text-gray-200 font-bold text-2xl">
+																		<h3 className="text-gray-200 font-bold text-lg">
 																			{Math.max(
 																				1,
 																				Math.min(
