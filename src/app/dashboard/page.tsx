@@ -200,89 +200,94 @@ export default function Home() {
 			const jsonTrophs = await responseTrophs.json();
 			setTrophs(jsonTrophs.data);
 
-			const response = await fetch("/api/find/stats", {
-				method: "POST",
-				body: JSON.stringify({
-					email: session?.user?.email,
-				}),
-			});
+			if (session?.user?.email) {
+				const response = await fetch("/api/find/stats", {
+					method: "POST",
+					body: JSON.stringify({
+						email: session?.user?.email,
+					}),
+				});
 
-			const { certain, errors, time } = await response.json();
+				const { certain, errors, time } = await response.json();
 
-			setStats({ certain, errors, time });
+				setStats({ certain, errors, time });
 
-			let responseLastStudy = await fetch("/api/find/study", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					where: {
-						userId: session?.user?.email,
+				let responseLastStudy = await fetch("/api/find/study", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
 					},
-					orderBy: {
-						date: "desc",
-					},
-				}),
-			});
-
-			const jsonLastStudy = await responseLastStudy.json(); // <- aguarda o JSON
-			setLastStudy(jsonLastStudy.data[0]); // <- agora o .data vai existir
-
-			let responseStudyData = await fetch("/api/find/study", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					filter: {
+					body: JSON.stringify({
 						where: {
-							userId: {
-								equals: session?.user?.email,
+							userId: session?.user?.email,
+						},
+						orderBy: {
+							date: "desc",
+						},
+					}),
+				});
+
+				const jsonLastStudy = await responseLastStudy.json(); // <- aguarda o JSON
+				setLastStudy(jsonLastStudy.data[0]); // <- agora o .data vai existir
+
+				let responseStudyData = await fetch("/api/find/study", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						filter: {
+							where: {
+								userId: {
+									equals: session?.user?.email,
+								},
 							},
 						},
-					},
-				}),
-			});
+					}),
+				});
 
-			const responseJson = await responseStudyData.json();
-			const jsonStudyData = responseJson.data;
+				const responseJson = await responseStudyData.json();
+				const jsonStudyData = responseJson.data;
 
-			if (jsonStudyData?.length > 0) {
-				const labels = jsonStudyData.map((item: any, id: number) => id + 1);
-				const horasEstudo = jsonStudyData.map((item: any) =>
-					Math.floor(item.time / 60)
-				);
-				const acertos = jsonStudyData.map((item: any) => item.certain);
-				const erros = jsonStudyData.map((item: any) => item.errors);
+				if (jsonStudyData?.length > 0) {
+					const labels = jsonStudyData.map((item: any, id: number) => id + 1);
+					const horasEstudo = jsonStudyData.map((item: any) =>
+						Math.floor(item.time / 60)
+					);
+					const acertos = jsonStudyData.map((item: any) => item.certain);
+					const erros = jsonStudyData.map((item: any) => item.errors);
 
-				const data = {
-					labels,
-					datasets: [
-						{
-							label: "Horas de estudo",
-							data: horasEstudo,
-							backgroundColor: "rgb(255, 99, 132)",
-						},
-						{
-							label: "Acertos",
-							data: acertos,
-							backgroundColor: "rgb(75, 192, 192)",
-						},
-						{
-							label: "Erros",
-							data: erros,
-							backgroundColor: "rgb(53, 162, 235)",
-						},
-					],
-				};
+					const data = {
+						labels,
+						datasets: [
+							{
+								label: "Horas de estudo",
+								data: horasEstudo,
+								backgroundColor: "rgb(255, 99, 132)",
+							},
+							{
+								label: "Acertos",
+								data: acertos,
+								backgroundColor: "rgb(75, 192, 192)",
+							},
+							{
+								label: "Erros",
+								data: erros,
+								backgroundColor: "rgb(53, 162, 235)",
+							},
+						],
+					};
 
-				setChartData(data);
-			} else {
-				console.warn("Nenhum dado retornado de /api/find/study", responseJson);
+					setChartData(data);
+				} else {
+					console.warn(
+						"Nenhum dado retornado de /api/find/study",
+						responseJson
+					);
+				}
+
+				setStatusEffect("loaded");
 			}
-
-			setStatusEffect("loaded");
 		}
 		run();
 	}, [status]);

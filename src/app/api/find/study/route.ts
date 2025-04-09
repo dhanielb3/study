@@ -5,6 +5,8 @@ const prisma = new PrismaClient()
 export async function POST(req: Request) {
   const body: any = await req.json()
 
+  console.log(body)
+
   const result = await prisma.study.findMany({
     where: body.filter?.where || {},
     orderBy: body.filter?.orderBy,
