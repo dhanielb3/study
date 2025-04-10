@@ -688,19 +688,7 @@ export default function Home() {
 																			</svg>
 																		</span>
 																		<h3 className="text-gray-200 font-bold text-lg">
-																			{Math.max(
-																				1,
-																				Math.min(
-																					Math.round(
-																						(((certain /
-																							(certain + errors + 1)) *
-																							certain) /
-																							(parseInt(time) / 60 + 1)) *
-																							100
-																					),
-																					(parseInt(time) / 60) * 1000
-																				)
-																			)}{" "}
+																			{(certain * 10) - (errors * 5) + (parseInt(time)/60 * 15)}{" "}
 																			({achievements.length})
 																		</h3>
 																	</div>
