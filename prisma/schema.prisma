@@ -46,14 +46,17 @@ model Study {
   trophs      Int
   local       String
   user        User     @relation(fields: [userId], references: [email], onDelete: Cascade)
+  troph       Trophs?
 }
 
 model Trophs {
-  id     String    @id @default(cuid())
-  userId String
-  date   DateTime?
-  trophs Int
-  user   User      @relation(fields: [userId], references: [email], onDelete: Cascade)
+  id      String    @id @default(cuid())
+  userId  String
+  studyId String    @unique
+  date    DateTime?
+  trophs  Int
+  user    User      @relation(fields: [userId], references: [email], onDelete: Cascade)
+  study   Study     @relation(fields: [studyId], references: [id])
 }
 
 model User {
@@ -70,7 +73,7 @@ model User {
 }
 
 model VerificationToken {
-  id            String    @id @default(cuid())
+  id         String   @id @default(cuid())
   identifier String
   token      String   @unique
   expires    DateTime

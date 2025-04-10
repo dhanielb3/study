@@ -691,7 +691,7 @@ export default function Home() {
 																			{Math.round(
 																				certain * 10 -
 																					errors * 5 +
-																					(parseInt(time) / 60) * 15
+																					(parseInt(time) / 60) * 90
 																			)}{" "}
 																			({achievements.length})
 																		</h3>

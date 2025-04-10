@@ -15,14 +15,6 @@ export async function POST(req: Request) {
     },
   })
 
-  await prisma.trophs.create({
-    data: {
-      trophs: 0,
-      date: new Date(),
-      userId: dados.email
-    },
-  })
-
   if (user?.email) {
     return new Response(JSON.stringify({ user: {
       data: {
