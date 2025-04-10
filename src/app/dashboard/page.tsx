@@ -224,7 +224,7 @@ export default function Home() {
 							where: {
 								userId: session?.user?.email,
 							},
-							orderBy: { date: 'desc' },
+							orderBy: { date: "desc" },
 						},
 					}),
 				});
@@ -627,7 +627,7 @@ export default function Home() {
 															name={user?.name || "Usuário"}
 															photo={user?.image || ""}
 															local={
-																local.indexOf("undefined") != -1 ? local : ""
+																local.indexOf("undefined") === -1 ? local : ""
 															}
 															dataFormated={formatDate(date)}
 														></Player>
@@ -688,7 +688,11 @@ export default function Home() {
 																			</svg>
 																		</span>
 																		<h3 className="text-gray-200 font-bold text-lg">
-																			{(certain * 10) - (errors * 5) + (parseInt(time)/60 * 15)}{" "}
+																			{Math.round(
+																				certain * 10 -
+																					errors * 5 +
+																					(parseInt(time) / 60) * 15
+																			)}{" "}
 																			({achievements.length})
 																		</h3>
 																	</div>
