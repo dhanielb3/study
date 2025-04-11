@@ -12,6 +12,7 @@ export async function POST(req: Request) {
 
   await prisma.trophs.create({
     data: {
+      studyId: study.id,
       trophs: dados.trophs,
       date: dados.date,
       userId: dados.userId

@@ -689,9 +689,9 @@ export default function Home() {
 																		</span>
 																		<h3 className="text-gray-200 font-bold text-lg">
 																			{Math.round(
-																				certain * 10 -
-																					errors * 5 +
-																					(parseInt(time) / 60) * 90
+																				(certain * 10) -
+																					(errors * 5) +
+																					((parseInt(time) / 60) * 90)
 																			)}{" "}
 																			({achievements.length})
 																		</h3>
