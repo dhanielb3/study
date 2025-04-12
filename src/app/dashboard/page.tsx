@@ -187,7 +187,7 @@ export default function Home() {
 				body: JSON.stringify({
 					filter: {
 						where: {},
-						orderBy: { date: "desc" },
+						orderBy: { date: "asc" },
 					}
 				}),
 			});
