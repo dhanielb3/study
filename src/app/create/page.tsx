@@ -199,6 +199,7 @@ export default function EstudoForm() {
 								Foto
 							</Label>
 							<div className="w-full bg-[#111827] p-4 rounded-xl border border-gray-700">
+								{ /*@ts-ignore*/ }
 								<FileUploaderRegular className="text-white" pubkey={pubKey} onChange={handleChangeEvent} />
 								{photo && (
 									<Image
