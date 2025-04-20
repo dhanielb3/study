@@ -11,71 +11,105 @@ export default function Home() {
 	const [email, setEmail] = useState("");
 	const [code, setCode] = useState("");
 	const [name, setName] = useState("");
-	const [foto, setFoto] = useState<string | null>(null);
-	const router = useRouter()
+	const [photo, setPhoto] = useState<string | null>(null);
+	const [fotoFile, setFotoFile] = useState<File | null>(null);
+	const router = useRouter();
 
-	const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
+			setFotoFile(file);
 			const reader = new FileReader();
-			reader.onloadend = () => setFoto(reader.result as string);
+			reader.onloadend = () => {
+				const base64String = reader.result?.toString() || "";
+				setPhoto(base64String);
+			};
 			reader.readAsDataURL(file);
 		}
 	};
 
 	async function SignUpWithEmail() {
 		let response: any = await fetch("/api/find/user", {
-			method: 'POST',
+			method: "POST",
 			headers: {
-				'Content-Type': 'application/json'
-			  },
+				"Content-Type": "application/json",
+			},
 			body: JSON.stringify({
-				email: email
-			})
-		})
+				email: email,
+			}),
+		});
 
-		if(response.json?.user?.email != "") {
+		if ((await response.json())?.user?.email !== "") {
+			let uploadedFotoUrl = "";
+
+			if (fotoFile) {
+				const formData = new FormData();
+				formData.append("UPLOADCARE_STORE", "1");
+				formData.append("UPLOADCARE_PUB_KEY", "SUA_PUBLIC_KEY"); // coloca tua chave aqui
+				formData.append("file", fotoFile);
+
+				try {
+					const uploadResponse = await fetch(
+						"https://upload.uploadcare.com/base/",
+						{
+							method: "POST",
+							body: formData,
+						}
+					);
+
+					const uploadData = await uploadResponse.json();
+					if (uploadData?.file) {
+						uploadedFotoUrl = `https://ucarecdn.com/${uploadData.file}/`;
+					} else {
+						alert("Erro ao subir foto");
+						return;
+					}
+				} catch (error) {
+					console.error("Erro no upload da foto:", error);
+					return;
+				}
+			}
+
 			let user = await fetch("/api/create/user", {
-				method: 'POST',
+				method: "POST",
 				headers: {
-					'Content-Type': 'application/json'
-				  },
+					"Content-Type": "application/json",
+				},
 				body: JSON.stringify({
 					dados: {
 						email,
-						foto,
-						name
-					}
-				})
-			})
-			
-			if(user.ok) {
+						foto: uploadedFotoUrl,
+						name,
+					},
+				}),
+			});
+
+			if (user.ok) {
 				const signInResult = await signIn("email", {
 					email: email,
 					callbackUrl: "/dashboard",
 					redirect: true,
 				});
-		
+
 				if (!signInResult?.ok) {
 					return "error";
 				}
-		
+
 				setEmail("");
-		
 				return "success";
 			}
-		}else{
-			alert("[ALERTA] Usuário já existente")
+		} else {
+			alert("[ALERTA] Usuário já existente");
 		}
 	}
 
 	const { data: session } = useSession();
 
 	useEffect(() => {
-		if(session?.user) {
-			router.push("/dashboard")
+		if (session?.user) {
+			router.push("/dashboard");
 		}
-	}, [session])
+	}, [session]);
 
 	const Logout = async () => {
 		signOut();
@@ -107,11 +141,11 @@ export default function Home() {
 
 				<form
 					onSubmit={async (e) => {
-						e.preventDefault()
-						if (email != "" && name != "" && foto != null && code == "kkk") {
+						e.preventDefault();
+						if (email != "" && name != "" && photo != null && code == "kkk") {
 							await SignUpWithEmail();
-						}else{
-							alert("[ALERTA] Preencha todos os dados corretamente")
+						} else {
+							alert("[ALERTA] Preencha todos os dados corretamente");
 						}
 					}}
 				>
@@ -133,17 +167,20 @@ export default function Home() {
 						}}
 						value={email}
 					></InputText>
-					<span className="text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">Foto</span><br></br>
+					<span className="text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+						Foto
+					</span>
+					<br></br>
 					<div className="w-full p-4 rounded-xl border border-gray-700">
 						<Input
 							type="file"
 							accept="image/*"
-							onChange={handleFotoChange}
+							onChange={handlePhotoChange}
 							className="text-white"
 						/>
-						{foto && (
+						{photo && (
 							<Image
-								src={foto}
+								src={photo}
 								alt="Foto do estudo"
 								width={300}
 								height={300}
