@@ -263,7 +263,7 @@ export default function EstudoForm() {
 						<Label className="text-blue-400 font-[family-name:var(--font-geist-mono)]">
 							Foto
 						</Label>
-						<div className="w-full p-4 rounded-xl">
+						<div className="col-span-3 w-full p-4 rounded-xl">
 							<Input
 								type="file"
 								accept="image/*"
