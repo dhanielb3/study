@@ -37,7 +37,7 @@ import { createTheme } from "@mui/material";
 const pubKey = process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY;
 
 export default function EstudoForm() {
-	const [photo, setPhoto] = useState<String | null>(null);
+	const [photo, setPhoto] = useState<string | null>(null);
 	const [tema, setTema] = useState("");
 	const [date, setDate] = useState<Date | undefined>(undefined);
 	const [acertos, setAcertos] = useState("");
