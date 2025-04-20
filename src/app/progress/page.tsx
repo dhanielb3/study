@@ -153,11 +153,13 @@ export default function Home() {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
-						where: {
-							userId: session?.user?.email,
-						},
-						orderBy: {
-							date: "desc",
+						filter: {
+							where: {
+								userId: session?.user?.email,
+							},
+							orderBy: {
+								date: "desc",
+							},
 						},
 					}),
 				});

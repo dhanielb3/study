@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,9 +17,13 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { FileUploaderRegular } from "@uploadcare/react-uploader/next";
+import "@uploadcare/react-uploader/core.css";
+
+const pubKey = process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY;
 
 export default function EstudoForm() {
-	const [foto, setFoto] = useState<string | null>(null);
+	const [photo, setPhoto] = useState<Buffer | null>(null);
 	const [tema, setTema] = useState("");
 	const [date, setDate] = useState<Date | undefined>(undefined);
 	const [acertos, setAcertos] = useState("");
@@ -71,36 +75,59 @@ export default function EstudoForm() {
 		}
 	}, [location]);
 
-	const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onloadend = () => setFoto(reader.result as string);
-			reader.readAsDataURL(file);
+	// const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	// 	const file = e.target.files?.[0];
+	// 	if (file) {
+	// 		const reader = new FileReader();
+	// 		reader.onloadend = () => setFoto(reader.result as string);
+	// 		reader.readAsDataURL(file);
+	// 	}
+	// };
+
+	//const handlePhotoChange = async (e: ChangeEvent<HTMLInputElement>) => {
+	//	const file = e.target.files?.[0];
+	//	if (!file) return;
+	//
+	//	const arrayBuffer = await file.arrayBuffer();
+	//	const buffer = Buffer.from(arrayBuffer);
+	//	setPhoto(buffer);
+	//};
+
+	const [files, setFiles] = useState([]);
+	//@ts-ignore
+	const handleChangeEvent = (e) => {
+		//@ts-ignore
+		const firstSuccessfulFile = e.allEntries.find((file) => file.status === "success");
+		if (firstSuccessfulFile) {
+			//@ts-ignore
+			setFiles([firstSuccessfulFile]);
 		}
 	};
 
 	const handleSubmit = async () => {
 		const now = new Date();
-		const dateWithTime = new Date(date!);
+		if (!date) return;
+	
+		const dateWithTime = new Date(date);
 		dateWithTime.setHours(
 			now.getHours(),
 			now.getMinutes(),
 			now.getSeconds(),
 			now.getMilliseconds()
 		);
-
-		const hours = parseInt(duracaoHoras.toString());
-		const minutes = parseInt(duracaoMinutos.toString());
-		const seconds = parseInt(duracaoSegundos.toString());
-
-		const correct = parseInt(acertos.toString());
-		const wrong = parseInt(erros.toString());
-
+	
+		const hours = parseInt(duracaoHoras) || 0;
+		const minutes = parseInt(duracaoMinutos) || 0;
+		const seconds = parseInt(duracaoSegundos) || 0;
+	
+		const correct = parseInt(acertos) || 0;
+		const wrong = parseInt(erros) || 0;
+	
 		const totalTime = hours * 60 + minutes + seconds / 60;
-
+	
 		const data = {
-			photo: foto,
+			//@ts-ignore
+			photo: files?.[0]?.cdnUrl || "",
 			userId: session?.user?.email,
 			title: tema,
 			date: dateWithTime,
@@ -108,23 +135,26 @@ export default function EstudoForm() {
 			errors: wrong,
 			time: totalTime,
 			description: anotacoes,
-			trophs: Math.round((correct * 15) - (wrong * 10) + ((totalTime/60) * 90)),
-			local: local?.address?.town + ", " + local?.address?.state,
+			trophs: Math.round(correct * 15 - wrong * 10 + (totalTime / 60) * 90),
+			local: local?.address
+				? `${local.address.town}, ${local.address.state}`
+				: "Localização desconhecida",
 		};
-
-		const study = await fetch("/api/create/study", {
+	
+		await fetch("/api/create/study", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({ dados: data }),
 		});
-
+	
 		router.push("/dashboard");
 	};
+	
 
 	const handleClear = () => {
-		setFoto(null);
+		setPhoto(null);
 		setTema("");
 		setDate(undefined);
 		setAcertos("");
@@ -169,15 +199,10 @@ export default function EstudoForm() {
 								Foto
 							</Label>
 							<div className="w-full bg-[#111827] p-4 rounded-xl border border-gray-700">
-								<Input
-									type="file"
-									accept="image/*"
-									onChange={handleFotoChange}
-									className="text-white"
-								/>
-								{foto && (
+								<FileUploaderRegular className="text-white" pubkey={pubKey} onChange={handleChangeEvent} />
+								{photo && (
 									<Image
-										src={foto}
+										src={photo.toString("base64")}
 										alt="Foto do estudo"
 										width={300}
 										height={300}

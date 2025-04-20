@@ -1,6 +1,5 @@
 "use client";
 
-import InputText from "@/components/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
@@ -12,10 +11,10 @@ import {
 	Title,
 	Tooltip,
 	Legend,
+	ChartData,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import Player from "@/components/player";
-import example from "@/images/example.jpeg";
 import {
 	Select,
 	SelectContent,
@@ -25,8 +24,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useContext, useEffect, useState } from "react";
-import { Router } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
@@ -82,7 +80,56 @@ function limitText(text: string | undefined, maxLength: number = 15): string {
 		: text;
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+async function getStaticPropsStudy() {
+	let responseStudy = await fetch(`${BASE_URL}/api/find/study`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			filter: {
+				orderBy: { date: "asc" },
+			},
+		}),
+	});
+
+	const jsonStudy = await responseStudy.json();
+	return jsonStudy.data;
+}
+
+async function getStaticPropsTrophs() {
+	let responseTrophs = await fetch(`${BASE_URL}/api/find/trophs`, {
+		method: "POST",
+		body: JSON.stringify({
+			filter: {},
+		}),
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+
+	const jsonTrophs = await responseTrophs.json();
+	return jsonTrophs.data;
+}
+
+async function getStaticPropsStats() {
+	const response = await fetch(`${BASE_URL}/api/find/stats`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({}),
+	});
+
+	const jsonStats = await response.json();
+
+	return jsonStats;
+}
+
 export default function Home() {
+	//variáveis hook
 	const router = useRouter();
 	const [study, setStudy] = useState<
 		{
@@ -125,28 +172,11 @@ export default function Home() {
 		errors: number;
 		time: number;
 	}>({ certain: 0, errors: 0, time: 0 });
-	const [chartData, setChartData] = useState({
-		labels,
-		datasets: [
-			{
-				label: "Horas de estudo",
-				data: [],
-				backgroundColor: "rgb(255, 99, 132)",
-			},
-			{
-				label: "Acertos",
-				data: [],
-				backgroundColor: "rgb(75, 192, 192)",
-			},
-			{
-				label: "Erros",
-				data: [],
-				backgroundColor: "rgb(53, 162, 235)",
-			},
-		],
+	const [chartData, setChartData] = useState<ChartData<"bar">>({
+		labels: [],
+		datasets: [],
 	});
 	const [statusEffect, setStatusEffect] = useState("loading");
-
 	const [lastStudy, setLastStudy] = useState<{
 		id: string;
 		userId: string;
@@ -166,7 +196,6 @@ export default function Home() {
 		};
 		//@ts-ignore
 	}>({});
-
 	const { data: session, status } = useSession();
 
 	useEffect(() => {
@@ -178,89 +207,44 @@ export default function Home() {
 	}, [session, status]);
 
 	useEffect(() => {
-		async function run() {
-			let responseStudy = await fetch("/api/find/study", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					filter: {
-						where: {},
-						orderBy: { date: "asc" },
-					}
-				}),
-			});
+		let propsStudy;
+		let propsTrophs;
+		let propsStats;
 
-			const jsonStudy = await responseStudy.json(); // <- aguarda o JSON
-			setStudy(jsonStudy.data); // <- agora o .data vai existir
+		const fetchData = async () => {
+			propsStudy = await getStaticPropsStudy();
+			propsTrophs = await getStaticPropsTrophs();
+			propsStats = await getStaticPropsStats();
 
-			let responseTrophs = await fetch("/api/find/trophs", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
+			setStudy(propsStudy);
+			setTrophs(propsTrophs);
 
-			const jsonTrophs = await responseTrophs.json();
-			setTrophs(jsonTrophs.data);
-
+			//filtrar usuário
 			if (session?.user?.email) {
-				const response = await fetch("/api/find/stats", {
-					method: "POST",
-					body: JSON.stringify({
-						email: session?.user?.email,
-					}),
+				// --- STUDY ---
+				propsStudy.filter((item: { userId: string | null | undefined }) => {
+					return item.userId !== session?.user?.email;
 				});
 
-				const { certain, errors, time } = await response.json();
+				// --- TROPHS ---
+				let studiesByUser = propsStudy.filter(
+					(item: { userId: string | null | undefined }) => {
+						return item.userId !== session?.user?.email;
+					}
+				);
 
-				setStats({ certain, errors, time });
+				setLastStudy(studiesByUser[studiesByUser.length-1]);
+				setStats(propsStats);
 
-				let responseLastStudy = await fetch("/api/find/study", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						filter: {
-							where: {
-								userId: session?.user?.email,
-							},
-							orderBy: { date: "desc" },
-						},
-					}),
-				});
-
-				const jsonLastStudy = await responseLastStudy.json(); // <- aguarda o JSON
-				setLastStudy(jsonLastStudy.data[0]); // <- agora o .data vai existir
-
-				let responseStudyData = await fetch("/api/find/study", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						filter: {
-							where: {
-								userId: {
-									equals: session?.user?.email,
-								},
-							},
-						},
-					}),
-				});
-
-				const responseJson = await responseStudyData.json();
-				const jsonStudyData = responseJson.data;
-
-				if (jsonStudyData?.length > 0) {
-					const labels = jsonStudyData.map((item: any, id: number) => id + 1);
-					const horasEstudo = jsonStudyData.map((item: any) =>
+				if (studiesByUser?.length > 0) {
+					const labels = studiesByUser.map((item: any, id: number) =>
+						(id + 1).toString()
+					);
+					const horasEstudo = studiesByUser.map((item: any) =>
 						Math.floor(item.time / 60)
 					);
-					const acertos = jsonStudyData.map((item: any) => item.certain);
-					const erros = jsonStudyData.map((item: any) => item.errors);
+					const acertos = studiesByUser.map((item: any) => item.certain);
+					const erros = studiesByUser.map((item: any) => item.errors);
 
 					const data = {
 						labels,
@@ -287,14 +271,21 @@ export default function Home() {
 				} else {
 					console.warn(
 						"Nenhum dado retornado de /api/find/study",
-						responseJson
+						studiesByUser
 					);
 				}
 
+				// --- STATS ---
+
+				study.filter((item) => {
+					return item.userId == session?.user?.email;
+				});
+
 				setStatusEffect("loaded");
 			}
-		}
-		run();
+		};
+
+		fetchData();
 	}, [status]);
 
 	if (statusEffect == "loading") {
@@ -692,9 +683,9 @@ export default function Home() {
 																		</span>
 																		<h3 className="text-gray-200 font-bold text-lg">
 																			{Math.round(
-																				(certain * 15) -
-																					(errors * 10) +
-																					((parseInt(time) / 60) * 90)
+																				certain * 15 -
+																					errors * 10 +
+																					(parseInt(time) / 60) * 90
 																			)}{" "}
 																			({achievements.length})
 																		</h3>
@@ -724,8 +715,8 @@ export default function Home() {
 															</code>
 															<Image
 																src={photo || ""}
-																width={100}
-																height={100}
+																width={600}
+																height={600}
 																objectFit="contain"
 																className="w-[30vw] mt-[3vh]"
 																alt=""
