@@ -30,6 +30,7 @@ import { useSession } from "next-auth/react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import React from "react";
+import Create from "@/components/create";
 
 ChartJS.register(
 	CategoryScale,
@@ -233,7 +234,7 @@ export default function Home() {
 					}
 				);
 
-				setLastStudy(studiesByUser[studiesByUser.length-1]);
+				setLastStudy(studiesByUser[studiesByUser.length - 1]);
 				setStats(propsStats);
 
 				if (studiesByUser?.length > 0) {
@@ -512,6 +513,7 @@ export default function Home() {
 											.reverse()
 											.map((activy, id) => {
 												const {
+													id: activyId,
 													userId,
 													title,
 													certain,
@@ -617,14 +619,47 @@ export default function Home() {
 														</li>) : (
 														</li>	<div></div>
 														</li>)} */}
-														<Player
-															name={user?.name || "Usuário"}
-															photo={user?.image || ""}
-															local={
-																local.indexOf("undefined") === -1 ? local : ""
-															}
-															dataFormated={formatDate(date)}
-														></Player>
+														<div className="flex justify-between items-center w-full pr-8 py-2">
+															<Player
+																name={user?.name || "Usuário"}
+																photo={user?.image || ""}
+																local={
+																	local.indexOf("undefined") === -1
+																		? local
+																		: "Localização desconhecida"
+																}
+																dataFormated={formatDate(date)}
+															/>
+															{session?.user?.email == user.email ? (
+																<button className="ml-4 bg-red-500 text-red-900 px-3 py-1 rounded focus:bg-red-400 transition" onClick={() => {
+																	async function deleteStudy() {
+																		await fetch(`${BASE_URL}/api/delete/study/`, {
+																			method: "POST",
+																			headers: {
+																				"Content-Type": "application/json",
+																			},
+																			body: JSON.stringify({
+																				filter: {
+																					where: {
+																						id: activyId
+																					}
+																				},
+																			}),
+																		});
+
+																		alert("Deletando registro...")
+
+																		window.location.href = window.location.href;
+																	}
+
+																	deleteStudy()
+																}}>
+																	Deletar
+																</button>
+															) : (
+																<div></div>
+															)}
+														</div>
 														<div className="text-left text-2xl ml-[1vw] mt-8 ">
 															{title}
 														</div>
@@ -713,14 +748,18 @@ export default function Home() {
 																)) ||
 																	"esta pessoa não é criativa... não coloca nem descrição (nada aqui...)"}
 															</code>
-															<Image
-																src={photo || ""}
-																width={600}
-																height={600}
-																objectFit="contain"
-																className="w-[30vw] mt-[3vh]"
-																alt=""
-															></Image>
+															{photo ? (
+																<Image
+																	src={photo || ""}
+																	width={600}
+																	height={600}
+																	objectFit="contain"
+																	className="w-[30vw] mt-[3vh]"
+																	alt=""
+																></Image>
+															) : (
+																<div></div>
+															)}
 														</div>
 														<div className="mb-[3vh]"></div>
 													</li>
@@ -807,24 +846,7 @@ export default function Home() {
 							</footer>
 						</div>
 
-						<a
-							href="/create"
-							rel="noopener noreferrer"
-							className="flex items-center justify-center fixed right-[4vw] bottom-[8vh] w-[3vw] h-[3vw] rounded-full bg-blue-600 hover:bg-blue-700 transition-transform duration-300 hover:scale-105 shadow-md hover:shadow-xl bg-opacity-80"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="28"
-								height="28"
-								fill="white"
-								viewBox="0 0 24 24"
-							>
-								<path
-									fillRule="evenodd"
-									d="M 11 2 L 11 11 L 2 11 L 2 13 L 11 13 L 11 22 L 13 22 L 13 13 L 22 13 L 22 11 L 13 11 L 13 2 Z"
-								/>
-							</svg>
-						</a>
+							<Create></Create>
 					</main>
 				</div>
 			)}

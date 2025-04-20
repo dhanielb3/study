@@ -5,6 +5,12 @@ const prisma = new PrismaClient()
 export async function POST(req: Request) {
   const body = await req.json()
 
+  await prisma.trophs.deleteMany({
+    where: {
+      studyId: body.filter?.where?.id,
+    },
+  });
+
   const study = await prisma.study.delete({
     where: body.filter?.where,
   })

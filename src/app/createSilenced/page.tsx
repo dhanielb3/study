@@ -149,7 +149,7 @@ export default function EstudoForm() {
 			body: JSON.stringify({ dados: data }),
 		});
 	
-		router.push("/dashboard");
+		window.location.href = window.location.href
 	};
 	
 
