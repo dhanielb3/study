@@ -31,11 +31,21 @@ import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import React from "react";
 import Create from "@/components/create";
-import gfm from "@bytemd/plugin-gfm";
 import { Editor, Viewer } from "@bytemd/react";
+
+import { formatDistanceToNow, differenceInDays } from "date-fns";
+
+import gfm from "@bytemd/plugin-gfm";
+import math from "@bytemd/plugin-math";
+import mediumZoom from "@bytemd/plugin-medium-zoom";
+import breaks from "@bytemd/plugin-breaks";
+import frontmatter from "@bytemd/plugin-frontmatter";
+import gemoji from "@bytemd/plugin-gemoji";
+import mermaid from "@bytemd/plugin-mermaid";
+import byteMDLocale from "bytemd/locales/pt_BR.json";
 import "bytemd/dist/index.css";
 import "./bytemd-dark.css";
-import { formatDistanceToNow, differenceInDays } from "date-fns";
+import "katex/dist/katex.css";
 
 function formatarTempoPassado(data: Date): string {
 	const agora = new Date();
@@ -66,6 +76,12 @@ ChartJS.register(
 
 const plugins = [
 	gfm(),
+	math(),
+	mediumZoom(),
+	breaks(),
+	frontmatter(),
+	gemoji(),
+	mermaid(),
 	// Add more plugins here
 ];
 
@@ -898,6 +914,7 @@ export default function Home() {
 																<div className="mt-[6vh]">
 																	<Editor
 																		value={value}
+																		locale={byteMDLocale}
 																		plugins={plugins}
 																		onChange={(v: string) => {
 																			if (v.length < 5000) {
@@ -924,7 +941,6 @@ export default function Home() {
 																		<button
 																			onClick={() => {
 																				async function createComment() {
-																					console.log("HEEHEH");
 																					await fetch(
 																						`${BASE_URL}/api/create/comment`,
 																						{
@@ -943,8 +959,6 @@ export default function Home() {
 																							}),
 																						}
 																					);
-
-																					console.log("HAAHAH");
 
 																					alert("Criando comentário...");
 																					window.location.href =
@@ -994,7 +1008,10 @@ export default function Home() {
 																							)}
 																						</span>
 																					</div>
-																					<p>{text}</p>
+																					<Viewer
+																						plugins={plugins}
+																						value={text}
+																					></Viewer>
 																				</li>
 																			);
 																		}

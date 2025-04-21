@@ -9,7 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@bytemd/plugin-breaks": "^1.22.0",
+    "@bytemd/plugin-frontmatter": "^1.22.0",
+    "@bytemd/plugin-gemoji": "^1.22.0",
     "@bytemd/plugin-gfm": "^1.22.0",
+    "@bytemd/plugin-math": "^1.22.0",
+    "@bytemd/plugin-medium-zoom": "^1.22.0",
+    "@bytemd/plugin-mermaid": "^1.22.0",
     "@bytemd/react": "^1.22.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -34,6 +40,7 @@
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
     "emotion": "^11.0.0",
+    "katex": "^0.16.22",
     "lucide-react": "^0.487.0",
     "magic-sdk": "^29.0.5",
     "next": "15.2.4",
