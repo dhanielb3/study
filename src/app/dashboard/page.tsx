@@ -36,7 +36,6 @@ import { Editor, Viewer } from "@bytemd/react";
 import "bytemd/dist/index.css";
 import "./bytemd-dark.css";
 import { formatDistanceToNow, differenceInDays } from "date-fns";
-import { useOnlineStatus } from "@/hook/useOnlineStatus";
 
 function formatarTempoPassado(data: Date): string {
 	const agora = new Date();
@@ -1032,17 +1031,6 @@ export default function Home() {
 								<h1 className="text-2xl font-bold text-center sm:text-left font-[family-name:var(--font-geist-mono)] text-gray-300">
 									Troféu Geral
 								</h1>
-
-								<div className="flex items-center gap-1">
-									<span className="w-4 h-4 rounded-full bg-green-500 animate-pulse" />
-									<span className="text-[1.25rem] text-gray-400">
-										{
-											usersStatus.filter(
-												(user: { status: string }) => user.status === "online"
-											).length
-										}
-									</span>
-								</div>
 							</div>
 							<br></br>
 							<ul className="pr-[2vw]">
