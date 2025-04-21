@@ -855,7 +855,7 @@ export default function Home() {
 																		value={value}
 																		plugins={plugins}
 																		onChange={(v: string) => {
-																			if (v.length < 100) {
+																			if (v.length < 5000) {
 																				setValue(v);
 																			} else {
 																				alert(
