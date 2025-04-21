@@ -284,7 +284,7 @@ export default function Home() {
 				// --- TROPHS ---
 				let studiesByUser = propsStudy.filter(
 					(item: { userId: string | null | undefined }) => {
-						return item.userId !== session?.user?.email;
+						return item.userId == session?.user?.email;
 					}
 				);
 
