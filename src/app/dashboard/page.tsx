@@ -349,26 +349,28 @@ export default function Home() {
 						],
 					};
 
-					setChartData(data || {
-						labels: [],
-						datasets: [
-							{
-								label: "Horas de estudo",
-								data: [],
-								backgroundColor: "rgb(255, 99, 132)",
-							},
-							{
-								label: "Acertos",
-								data: [],
-								backgroundColor: "rgb(75, 192, 192)",
-							},
-							{
-								label: "Erros",
-								data: [],
-								backgroundColor: "rgb(53, 162, 235)",
-							},
-						],
-					});
+					setChartData(
+						data || {
+							labels: [],
+							datasets: [
+								{
+									label: "Horas de estudo",
+									data: [],
+									backgroundColor: "rgb(255, 99, 132)",
+								},
+								{
+									label: "Acertos",
+									data: [],
+									backgroundColor: "rgb(75, 192, 192)",
+								},
+								{
+									label: "Erros",
+									data: [],
+									backgroundColor: "rgb(53, 162, 235)",
+								},
+							],
+						}
+					);
 				} else {
 					console.warn(
 						"Nenhum dado retornado de /api/find/study",
@@ -419,15 +421,20 @@ export default function Home() {
 												src={session?.user?.image || ""}
 												alt={"Foto de " + session?.user?.name}
 											/>
-											<AvatarFallback>
-												{session?.user?.name}
-											</AvatarFallback>
+											<AvatarFallback>{session?.user?.name}</AvatarFallback>
 										</Avatar>
 
 										<br />
 
 										<h1 className="text-2xl font-bold text-center font-[family-name:var(--font-geist-mono)] text-gray-300 top-[-6vh] relative">
-											{session?.user?.name}
+											{(() => {
+												const name = session?.user?.name || "";
+												const parts = name.trim().split(" ");
+												if (parts.length === 1) return parts[0];
+												if (parts.length === 2)
+													return `${parts[0]} ${parts[1]}`;
+												return `${parts[0]} ${parts[1][0]}.`;
+											})()}
 										</h1>
 
 										<div className="flex h-5 justify-items-center space-x-4 text-sm top-[-1.5vh] relative">
