@@ -930,7 +930,7 @@ export default function Home() {
 																			const { userId, userName, text, date: dateComment } = item;
 
 																			return (
-																				<li className="mt-4">
+																				<li className="mt-4" key={commentId}>
 																					<div className="flex items-center gap-2 mb-1">
 																						<span className="bg-blue-100 text-blue-600 text-sm font-semibold px-2 py-1 rounded">
 																							{userName}
