@@ -1,0 +1,49 @@
+/* bytemd-dark.css */
+
+.bytemd {
+    --bytemd-color-background: #0d1117;
+    --bytemd-color-foreground: #c9d1d9;
+    --bytemd-color-border: #30363d;
+    --bytemd-color-muted: #8b949e;
+    --bytemd-color-accent: #58a6ff;
+    --bytemd-color-error: #f85149;
+    --bytemd-color-code-background: #161b22;
+    --bytemd-color-code-foreground: #c9d1d9;
+    border: 0;
+    border-radius: 1vw;
+  }
+  
+  
+  /* Cursor branco (linha vertical piscando) */
+  .bytemd .CodeMirror-cursor {
+    border-left: 2px solid white !important;
+  }
+  
+  /* Garante que o campo aceite cor de cursor branca */
+  .bytemd,
+  .bytemd .CodeMirror {
+    background-color: var(--bytemd-color-background) !important;
+    color: var(--bytemd-color-foreground) !important;
+    caret-color: white !important;
+  }
+  
+  /* Garante que o editor esteja em modo escuro real */
+  .bytemd .CodeMirror-lines {
+    background-color: transparent !important;
+    color: white !important;
+  }
+  
+  .bytemd .bytemd-toolbar {
+    border-color: var(--bytemd-color-border);
+    background-color: var(--bytemd-color-background);
+    border-bottom: 1px solid #30363d !important;
+  }
+  
+  .bytemd .bytemd-toolbar-icon:hover {
+    background-color: #21262d;
+  }
+  
+  .bytemd .bytemd-preview {
+    background-color: var(--bytemd-color-background);
+    color: var(--bytemd-color-foreground);
+  }

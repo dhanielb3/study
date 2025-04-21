@@ -31,6 +31,29 @@ import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import React from "react";
 import Create from "@/components/create";
+import gfm from "@bytemd/plugin-gfm";
+import { Editor, Viewer } from "@bytemd/react";
+import "bytemd/dist/index.css";
+import "./bytemd-dark.css";
+import { formatDistanceToNow, differenceInDays } from "date-fns";
+
+function formatarTempoPassado(data: Date): string {
+	const agora = new Date();
+	const dias = differenceInDays(agora, data);
+
+	if (dias === 0) {
+		// Se for no mesmo dia, mostra "há x minutos/horas"
+		return formatDistanceToNow(data, { addSuffix: true, locale: ptBR });
+	}
+
+	if (dias < 30) {
+		// Se tiver menos de 30 dias, mostra "x dias atrás"
+		return `${dias} ${dias === 1 ? "dia" : "dias"} atrás`;
+	}
+
+	// Caso contrário, mostra a data no formato: 20/03/2025
+	return format(data, "dd/MM/yyyy");
+}
 
 ChartJS.register(
 	CategoryScale,
@@ -40,6 +63,11 @@ ChartJS.register(
 	Tooltip,
 	Legend
 );
+
+const plugins = [
+	gfm(),
+	// Add more plugins here
+];
 
 const options = {
 	plugins: {
@@ -198,6 +226,32 @@ export default function Home() {
 		//@ts-ignore
 	}>({});
 	const { data: session, status } = useSession();
+	const [value, setValue] = useState("");
+	const [commentIsOpen, setCommentIsOpen] = useState<{ [id: string]: boolean }>(
+		{}
+	);
+	const [comments, setComments] = useState<
+		{
+			studyId: string;
+			userId: string;
+			userName: string;
+			text: string;
+			date: Date;
+		}[]
+	>([]);
+
+	async function getComments() {
+		const response = await fetch(`${BASE_URL}/api/find/comment`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({}),
+		});
+
+		const data = await response.json();
+		setComments(data.data);
+	}
 
 	useEffect(() => {
 		if (status === "loading") return; // ainda carregando, não redireciona
@@ -287,6 +341,7 @@ export default function Home() {
 		};
 
 		fetchData();
+		getComments();
 	}, [status]);
 
 	if (statusEffect == "loading") {
@@ -586,6 +641,17 @@ export default function Home() {
 														icon: "🌙",
 													});
 												}
+												let commentStudy: {
+													studyId: string;
+													userId: string;
+													userName: string;
+													text: string;
+													date: Date;
+												}[] = [];
+
+												commentStudy = comments.filter(
+													(item) => item.studyId == activyId
+												);
 
 												return (
 													<li
@@ -631,29 +697,36 @@ export default function Home() {
 																dataFormated={formatDate(date)}
 															/>
 															{session?.user?.email == user.email ? (
-																<button className="ml-4 bg-red-500 text-red-900 px-3 py-1 rounded focus:bg-red-400 transition" onClick={() => {
-																	async function deleteStudy() {
-																		await fetch(`${BASE_URL}/api/delete/study/`, {
-																			method: "POST",
-																			headers: {
-																				"Content-Type": "application/json",
-																			},
-																			body: JSON.stringify({
-																				filter: {
-																					where: {
-																						id: activyId
-																					}
-																				},
-																			}),
-																		});
+																<button
+																	className="ml-4 bg-red-500 text-red-900 px-3 py-1 rounded focus:bg-red-400 transition"
+																	onClick={() => {
+																		async function deleteStudy() {
+																			await fetch(
+																				`${BASE_URL}/api/delete/study/`,
+																				{
+																					method: "POST",
+																					headers: {
+																						"Content-Type": "application/json",
+																					},
+																					body: JSON.stringify({
+																						filter: {
+																							where: {
+																								id: activyId,
+																							},
+																						},
+																					}),
+																				}
+																			);
 
-																		alert("Deletando registro...")
+																			alert("Deletando registro...");
 
-																		window.location.href = window.location.href;
-																	}
+																			window.location.href =
+																				window.location.href;
+																		}
 
-																	deleteStudy()
-																}}>
+																		deleteStudy();
+																	}}
+																>
 																	Deletar
 																</button>
 															) : (
@@ -761,6 +834,125 @@ export default function Home() {
 																<div></div>
 															)}
 														</div>
+														<div className="mx-[1vw] transition-all">
+															{!commentIsOpen[activyId] ? (
+																<button
+																	onClick={() => {
+																		setCommentIsOpen((prev) => ({
+																			...prev, // Copia o estado anterior
+																			[activyId]: !prev[activyId], // Alterna o valor para o activyId
+																		}));
+																	}}
+																	className="my-[3vh] px-[1.3vw] py-[0.8vh] bg-gray-600 text-white font-bold shadow-accent rounded-lg border focus:bg-gray-700"
+																>
+																	Responder
+																</button>
+															) : null}
+
+															{commentIsOpen[activyId] ? (
+																<div className="mt-[6vh]">
+																	<Editor
+																		value={value}
+																		plugins={plugins}
+																		onChange={(v: string) => {
+																			if (v.length < 100) {
+																				setValue(v);
+																			} else {
+																				alert(
+																					"Limite de letras excedidos no comentário"
+																				);
+																			}
+																		}}
+																	/>
+																	<div className="w-full flex justify-end gap-2 px-[3vw] ml-[2.5vw]">
+																		<button
+																			onClick={() => {
+																				setCommentIsOpen((prev) => ({
+																					...prev, // Copia o estado anterior
+																					[activyId]: !prev[activyId], // Alterna o valor para o activyId
+																				}));
+																			}}
+																			className="cursor-pointer my-[3vh] px-[1.3vw] py-[0.8vh] text-gray-200 rounded-lg focus:bg-gray-700"
+																		>
+																			Cancelar
+																		</button>
+																		<button
+																			onClick={() => {
+																				async function createComment() {
+																					console.log("HEEHEH");
+																					await fetch(
+																						`${BASE_URL}/api/create/comment`,
+																						{
+																							method: "POST",
+																							headers: {
+																								"Content-Type":
+																									"application/json",
+																							},
+																							body: JSON.stringify({
+																								dados: {
+																									userId: session?.user?.email,
+																									studyId: activyId,
+																									userName: session?.user?.name,
+																									text: value,
+																								},
+																							}),
+																						}
+																					);
+
+																					console.log("HAAHAH");
+
+																					alert("Criando comentário...");
+																					window.location.href =
+																						window.location.href;
+																				}
+
+																				createComment();
+																			}}
+																			className="cursor-pointer my-[3vh] px-[1.3vw] py-[0.8vh] bg-green-600 text-white font-bold shadow-accent rounded-lg border focus:bg-gray-600 transition-all"
+																		>
+																			Enviar
+																		</button>
+																	</div>
+																</div>
+															) : null}
+															<div className="p-4 rounded-md max-w-xl">
+																<ul>
+																	{commentStudy.map(
+																		(
+																			item: {
+																				userId: string;
+																				userName: string;
+																				text: string;
+																				date: Date;
+																			},
+																			commentId: number
+																		) => {
+																			const { userId, userName, text, date: dateComment } = item;
+
+																			return (
+																				<li className="mt-4">
+																					<div className="flex items-center gap-2 mb-1">
+																						<span className="bg-blue-100 text-blue-600 text-sm font-semibold px-2 py-1 rounded">
+																							{userName}
+																						</span>
+																						<span className="text-gray-500 text-xs">
+																							{formatarTempoPassado(
+																								new Date(
+																									//@ts-ignore
+																									dateComment
+																								)
+																							)}
+																						</span>
+																					</div>
+																					<p>{text}</p>
+																				</li>
+																			);
+																		}
+																	)}
+																</ul>
+															</div>
+														</div>
+
 														<div className="mb-[3vh]"></div>
 													</li>
 												);
@@ -846,7 +1038,7 @@ export default function Home() {
 							</footer>
 						</div>
 
-							<Create></Create>
+						<Create></Create>
 					</main>
 				</div>
 			)}

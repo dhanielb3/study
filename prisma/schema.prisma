@@ -47,6 +47,7 @@ model Study {
   local       String
   user        User     @relation(fields: [userId], references: [email], onDelete: Cascade)
   troph       Trophs?
+  comments  Comments[]
 }
 
 model Trophs {
@@ -70,6 +71,21 @@ model User {
   sessions      Session[]
   trophs        Trophs[]
   Study         Study[]
+  Comments      Comments[]
+}
+
+model Comments {
+  id        String   @id @default(cuid())
+  text      String
+  userName  String
+  date      DateTime @default(now())
+
+  // Relacionamentos
+  studyId   String
+  userId    String
+
+  Study     Study     @relation(fields: [studyId], references: [id])
+  User      User      @relation(fields: [userId], references: [email])
 }
 
 model VerificationToken {
