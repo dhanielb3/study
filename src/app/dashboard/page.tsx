@@ -349,7 +349,26 @@ export default function Home() {
 						],
 					};
 
-					setChartData(data);
+					setChartData(data || {
+						labels: [],
+						datasets: [
+							{
+								label: "Horas de estudo",
+								data: [],
+								backgroundColor: "rgb(255, 99, 132)",
+							},
+							{
+								label: "Acertos",
+								data: [],
+								backgroundColor: "rgb(75, 192, 192)",
+							},
+							{
+								label: "Erros",
+								data: [],
+								backgroundColor: "rgb(53, 162, 235)",
+							},
+						],
+					});
 				} else {
 					console.warn(
 						"Nenhum dado retornado de /api/find/study",
@@ -401,9 +420,7 @@ export default function Home() {
 												alt={"Foto de " + session?.user?.name}
 											/>
 											<AvatarFallback>
-												{session?.user?.name?.split(" ").slice(0, 2)[0][0] +
-													" " +
-													session?.user?.name?.split(" ").slice(0, 2)[1][0]}
+												{session?.user?.name}
 											</AvatarFallback>
 										</Avatar>
 

@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { signIn, signOut, useSession } from "next-auth/react";
 
+const pubKey = process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY;
+
 export default function Home() {
 	const [email, setEmail] = useState("");
 	const [code, setCode] = useState("");
@@ -45,7 +47,11 @@ export default function Home() {
 			if (fotoFile) {
 				const formData = new FormData();
 				formData.append("UPLOADCARE_STORE", "1");
-				formData.append("UPLOADCARE_PUB_KEY", process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY || ""); // coloca tua chave aqui
+				if (!pubKey) {
+					alert("Chave pública do Uploadcare não definida.");
+					return;
+				  }
+				  formData.append("UPLOADCARE_PUB_KEY", pubKey);
 				formData.append("file", fotoFile);
 
 				try {
