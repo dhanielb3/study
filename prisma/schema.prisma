@@ -72,6 +72,7 @@ model User {
   trophs        Trophs[]
   Study         Study[]
   Comments      Comments[]
+  status  Status?
 }
 
 model Comments {
@@ -95,4 +96,12 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Status {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  status    String   // "online" ou "offline"
+  user      User     @relation(fields: [userId], references: [email], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
 }

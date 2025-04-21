@@ -36,6 +36,7 @@ import { Editor, Viewer } from "@bytemd/react";
 import "bytemd/dist/index.css";
 import "./bytemd-dark.css";
 import { formatDistanceToNow, differenceInDays } from "date-fns";
+import { useOnlineStatus } from "@/hook/useOnlineStatus";
 
 function formatarTempoPassado(data: Date): string {
 	const agora = new Date();
@@ -157,6 +158,34 @@ async function getStaticPropsStats() {
 	return jsonStats;
 }
 
+async function getStaticPropsCommentaries() {
+	const response = await fetch(`${BASE_URL}/api/find/comment`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({}),
+	});
+
+	const jsonComments = await response.json();
+
+	return jsonComments.data;
+}
+
+async function getStaticPropsStatus() {
+	const response = await fetch(`${BASE_URL}/api/find/status`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({}),
+	});
+
+	const jsonStats = await response.json();
+
+	return jsonStats.data;
+}
+
 export default function Home() {
 	//variáveis hook
 	const router = useRouter();
@@ -239,19 +268,11 @@ export default function Home() {
 			date: Date;
 		}[]
 	>([]);
+	const [usersStatus, setUsersStatus] = useState<
+		{ userId: string; status: string }[]
+	>([]);
 
-	async function getComments() {
-		const response = await fetch(`${BASE_URL}/api/find/comment`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({}),
-		});
-
-		const data = await response.json();
-		setComments(data.data);
-	}
+	useOnlineStatus();
 
 	useEffect(() => {
 		if (status === "loading") return; // ainda carregando, não redireciona
@@ -265,14 +286,20 @@ export default function Home() {
 		let propsStudy;
 		let propsTrophs;
 		let propsStats;
+		let propsCommentaries;
+		let propsStatus;
 
 		const fetchData = async () => {
 			propsStudy = await getStaticPropsStudy();
 			propsTrophs = await getStaticPropsTrophs();
 			propsStats = await getStaticPropsStats();
+			propsCommentaries = await getStaticPropsCommentaries();
+			propsStatus = await getStaticPropsStatus();
 
 			setStudy(propsStudy);
 			setTrophs(propsTrophs);
+			setComments(propsCommentaries);
+			setUsersStatus(propsStatus);
 
 			//filtrar usuário
 			if (session?.user?.email) {
@@ -341,7 +368,6 @@ export default function Home() {
 		};
 
 		fetchData();
-		getComments();
 	}, [status]);
 
 	if (statusEffect == "loading") {
@@ -927,7 +953,12 @@ export default function Home() {
 																			},
 																			commentId: number
 																		) => {
-																			const { userId, userName, text, date: dateComment } = item;
+																			const {
+																				userId,
+																				userName,
+																				text,
+																				date: dateComment,
+																			} = item;
 
 																			return (
 																				<li className="mt-4" key={commentId}>
@@ -975,9 +1006,22 @@ export default function Home() {
 								msOverflowStyle: "none", // Internet Explorer/Edge
 							}}
 						>
-							<h1 className="mt-[2vw] ml-[2vw] text-2xl font-bold text-center sm:text-left font-[family-name:var(--font-geist-mono)] text-gray-300">
-								Troféu Geral
-							</h1>
+							<div className="flex items-center justify-between pb-[0.5vw] px-[2vw] mt-[3vh]">
+								<h1 className="text-2xl font-bold text-center sm:text-left font-[family-name:var(--font-geist-mono)] text-gray-300">
+									Troféu Geral
+								</h1>
+
+								<div className="flex items-center gap-1">
+									<span className="w-4 h-4 rounded-full bg-green-500 animate-pulse" />
+									<span className="text-[1.25rem] text-gray-400">
+										{
+											usersStatus.filter(
+												(user: { status: string }) => user.status === "online"
+											).length
+										}
+									</span>
+								</div>
+							</div>
 							<br></br>
 							<ul className="pr-[2vw]">
 								{Object.values(
