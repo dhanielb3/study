@@ -427,9 +427,7 @@ export default function Home() {
 										<br />
 
 										<h1 className="text-2xl font-bold text-center font-[family-name:var(--font-geist-mono)] text-gray-300 top-[-6vh] relative">
-											{session?.user?.name?.split(" ").slice(0, 2)[0] +
-												" " +
-												session?.user?.name?.split(" ").slice(0, 2)[1]}
+											{session?.user?.name}
 										</h1>
 
 										<div className="flex h-5 justify-items-center space-x-4 text-sm top-[-1.5vh] relative">
