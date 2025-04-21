@@ -271,8 +271,6 @@ export default function Home() {
 		{ userId: string; status: string }[]
 	>([]);
 
-	useOnlineStatus();
-
 	useEffect(() => {
 		if (status === "loading") return; // ainda carregando, não redireciona
 
