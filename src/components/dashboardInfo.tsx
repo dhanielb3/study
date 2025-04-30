@@ -1,6 +1,5 @@
 "use client";
 
-import { getPastelColor } from "pastel-color";
 import {
 	Divider,
 	Card,
