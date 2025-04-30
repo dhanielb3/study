@@ -49,17 +49,6 @@ import {
 	Tab,
 } from "@tremor/react";
 import { Tracker } from "@/components/Trackerr";
-import {
-	CheckIcon,
-	XIcon,
-	CheckCircleIcon,
-	PlusCircleIcon,
-	ClockIcon,
-	PauseIcon,
-	StopIcon,
-	PlusIcon,
-	MinusIcon,
-} from "@heroicons/react/outline";
 import revisionImg from "@/images/revision.svg";
 import Image from "next/image";
 import { JSXElementConstructor, useEffect, useState } from "react";
@@ -78,12 +67,7 @@ import {
 } from "date-fns";
 import React from "react";
 import studyDayImg from "@/images/studyDay.svg";
-import dynamic from "next/dynamic";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight, Crown, CrownIcon } from "lucide-react";
-import { Button as ButtonComponent } from "@/components/ui/button";
-import { darken } from "polished";
 import dataQuote from "@/dataQuote.json";
 
 const valueFormatter = (hours: number) => {
@@ -127,10 +111,12 @@ export default function dashboard({
 		studyTrophs: number;
 	}[];
 }) {
+	
 	const [quote, setQuote] = useState<{
 		quote: string;
 		author: string;
-	}>({});
+		//@ts-ignore
+	}>({}); 
 
 	useEffect(() => {
 		setQuote(dataQuote[Math.floor(Math.random() * dataQuote.length)]);
@@ -292,10 +278,10 @@ export default function dashboard({
 								<TableHeaderCell>Tempo de Estudo</TableHeaderCell>
 								<TableHeaderCell>Produtividade</TableHeaderCell>
 								<TableHeaderCell>
-									<Badge color="emerald" icon={CheckIcon}></Badge>
+									
 								</TableHeaderCell>
 								<TableHeaderCell>
-									<Badge color="rose" icon={XIcon}></Badge>
+									
 								</TableHeaderCell>
 								<TableHeaderCell className="text-gray-500">T</TableHeaderCell>
 								<TableHeaderCell>Dificuldade</TableHeaderCell>
@@ -611,7 +597,6 @@ export default function dashboard({
 													{studyMatter}
 												</Title>
 												<Text className="flex">
-													<ClockIcon height={16}></ClockIcon>
 													{Math.floor(studyTime / 60)}h{" "}
 													{Math.floor(studyTime % 60)}
 													min / {Math.floor(studyMaxTime / 60)}h{" "}
@@ -623,7 +608,6 @@ export default function dashboard({
 													color="blue"
 												></ProgressBar>
 												<Button
-													icon={PlusCircleIcon}
 													className="z-50 mt-2"
 													onClick={() => {}}
 												>
@@ -757,13 +741,7 @@ export default function dashboard({
 																	<div className="z-40 absolute rounded-full bg-white opacity-30"></div>
 																	<div
 																		className="w-full h-full rounded-full animate-spin-slow"
-																		style={{
-																			backgroundImage: `linear-gradient(to right, ${
-																				getPastelColor().hex
-																			}, ${getPastelColor().hex}, ${
-																				getPastelColor().hex
-																			})`,
-																		}}
+																		style={{}}
 																	></div>
 																</div>
 															);
