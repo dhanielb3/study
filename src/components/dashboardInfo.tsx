@@ -111,12 +111,11 @@ export default function dashboard({
 		studyTrophs: number;
 	}[];
 }) {
-	
 	const [quote, setQuote] = useState<{
 		quote: string;
 		author: string;
 		//@ts-ignore
-	}>({}); 
+	}>({});
 
 	useEffect(() => {
 		setQuote(dataQuote[Math.floor(Math.random() * dataQuote.length)]);
@@ -277,12 +276,8 @@ export default function dashboard({
 								<TableHeaderCell>Título</TableHeaderCell>
 								<TableHeaderCell>Tempo de Estudo</TableHeaderCell>
 								<TableHeaderCell>Produtividade</TableHeaderCell>
-								<TableHeaderCell>
-									
-								</TableHeaderCell>
-								<TableHeaderCell>
-									
-								</TableHeaderCell>
+								<TableHeaderCell></TableHeaderCell>
+								<TableHeaderCell></TableHeaderCell>
 								<TableHeaderCell className="text-gray-500">T</TableHeaderCell>
 								<TableHeaderCell>Dificuldade</TableHeaderCell>
 								<TableHeaderCell>Data</TableHeaderCell>
@@ -572,50 +567,56 @@ export default function dashboard({
 						<div className="grid grid-flow-row grid-row-1 mt-[2rem]">
 							{[].length > 0 ? (
 								<div>
-									{[].map((element, id) => {
-										const studyMatter = element.name;
-										const studyTime = element.time;
-										const studyColor = element.color;
-										const studyMaxTime = element.maxTime;
+									{[].map(
+										(
+											element: {
+												name: string;
+												time: number;
+												color: string;
+												maxTime: number;
+												hex: string;
+											},
+											id
+										) => {
+											const studyMatter = element.name;
+											const studyTime = element.time;
+											const studyColor = element.color;
+											const studyMaxTime = element.maxTime;
 
-										return (
-											<Callout
-												key={id}
-												style={{
-													borderColor: studyColor.hex,
-												}}
-												className="grid grid-flow-row grid-cols-1 mb-8 cursor-pointer"
-												title={""}
-												color="neutral"
-											>
-												<Title
-													className="hover:underline"
-													style={{
-														color: "white",
-													}}
+											return (
+												<Callout
+													key={id}
+													style={{}}
+													className="grid grid-flow-row grid-cols-1 mb-8 cursor-pointer"
+													title={""}
+													color="neutral"
 												>
-													{studyMatter}
-												</Title>
-												<Text className="flex">
-													{Math.floor(studyTime / 60)}h{" "}
-													{Math.floor(studyTime % 60)}
-													min / {Math.floor(studyMaxTime / 60)}h{" "}
-													{Math.floor(studyMaxTime % 60)}min
-												</Text>
-												<ProgressBar
-													showAnimation
-													value={(100 * studyTime) / studyMaxTime}
-													color="blue"
-												></ProgressBar>
-												<Button
-													className="z-50 mt-2"
-													onClick={() => {}}
-												>
-													Adicionar estudo
-												</Button>
-											</Callout>
-										);
-									})}
+													<Title
+														className="hover:underline"
+														style={{
+															color: "white",
+														}}
+													>
+														{studyMatter}
+													</Title>
+													<Text className="flex">
+														{Math.floor(studyTime / 60)}h{" "}
+														{Math.floor(studyTime % 60)}
+														min / {Math.floor(studyMaxTime / 60)}h{" "}
+														{Math.floor(studyMaxTime % 60)}min
+													</Text>
+													<ProgressBar
+														showAnimation
+														value={(100 * studyTime) / studyMaxTime}
+														color="blue"
+													></ProgressBar>
+													<Button className="z-50 mt-2" onClick={() => {}}>
+														Adicionar estudo
+													</Button>
+												</Callout>
+											);
+										}
+									)}
 								</div>
 							) : (
 								<div>
@@ -672,9 +673,7 @@ export default function dashboard({
 								className="flex items-center justify-center flex-row"
 								style={{
 									color: "white",
-									display: [].some((element) => element.time !== 0)
-										? "none"
-										: "flex",
+									display: [].some((element) => 0 !== 0) ? "none" : "flex",
 									height: "100%", // Set the height to 100% to center vertically
 								}}
 							>
@@ -688,9 +687,7 @@ export default function dashboard({
 							</div>
 							<div
 								style={{
-									display: [].some((element) => element.time !== 0)
-										? "flex"
-										: "none",
+									display: [].some((element) => 0 !== 0) ? "flex" : "none",
 								}}
 							>
 								<Grid className="flex flex-col">
@@ -727,7 +724,7 @@ export default function dashboard({
 												icon: JSXElementConstructor<any>;
 											}[] = [];
 
-											[].map((element) => {
+											[].map((element: { name: string; time: number }) => {
 												if (element.time != 0) {
 													dataa.push({
 														name: element.name,
@@ -806,87 +803,111 @@ export default function dashboard({
 										</TableRow>
 									</TableHead>
 									<TableBody>
-										{[].map((item, id) => {
-											const itemId = item.data._id;
-											const course = item.data.studyCourse;
-											const matter = item.data.studyMatter;
-											const subTopic = item.data.studySubTopic;
-											const revisionData = item.revision;
-											const status = item.data.studyDifficult;
-											const date = item.data.studyDate;
-											const time = item.data.studyTime;
-											const revisionDay = item.revisionDate;
+										{[].map(
+											(
+												item: {
+													data: {
+														_id: string;
+														studyCourse: string;
+														studyMatter: string;
+														studySubTopic: string;
+														studyDifficult: string;
+														studyDate: string;
+														studyTime: number;
+														studyComment: string;
+													};
+													revision: string;
+													late: boolean;
+													revisionDate: string;
+													revisionDiff: number;
+												},
+												id
+											) => {
+												const itemId = item.data._id;
+												const course = item.data.studyCourse;
+												const matter = item.data.studyMatter;
+												const subTopic = item.data.studySubTopic;
+												const revisionData = item.revision;
+												const status = item.data.studyDifficult;
+												const date = item.data.studyDate;
+												const time = item.data.studyTime;
+												const revisionDay = item.revisionDate;
 
-											let badge = <BadgeDelta>{status}</BadgeDelta>;
+												let badge = <BadgeDelta>{status}</BadgeDelta>;
 
-											switch (status) {
-												case "Fácil":
-													badge = (
-														<BadgeDelta deltaType="increase">
-															{status}
-														</BadgeDelta>
-													);
-													break;
+												switch (status) {
+													case "Fácil":
+														badge = (
+															<BadgeDelta deltaType="increase">
+																{status}
+															</BadgeDelta>
+														);
+														break;
 
-												case "Médio":
-													badge = (
-														<BadgeDelta deltaType="unchanged">
-															{status}
-														</BadgeDelta>
-													);
-													break;
+													case "Médio":
+														badge = (
+															<BadgeDelta deltaType="unchanged">
+																{status}
+															</BadgeDelta>
+														);
+														break;
 
-												case "Difícil":
-													badge = (
+													case "Difícil":
+														badge = (
+															<BadgeDelta deltaType="decrease">
+																{status}
+															</BadgeDelta>
+														);
+														break;
+												}
+
+												let isLate = <BadgeDelta>{status}</BadgeDelta>;
+
+												if (item.late) {
+													isLate = (
 														<BadgeDelta deltaType="decrease">
-															{status}
+															Atrasada
 														</BadgeDelta>
 													);
-													break;
-											}
+												} else {
+													isLate = (
+														<BadgeDelta deltaType="increase">
+															Para hoje
+														</BadgeDelta>
+													);
+												}
 
-											let isLate = <BadgeDelta>{status}</BadgeDelta>;
-
-											if (item.late) {
-												isLate = (
-													<BadgeDelta deltaType="decrease">Atrasada</BadgeDelta>
+												return (
+													<TableRow
+														className="hover:bg-gray-200 hover:bg-opacity-10"
+														key={matter + id}
+													>
+														<TableCell>
+															<Checkbox
+																className="rounded-md p-2 mr-8 bg-gray-300 text-black border-0"
+																onCheckedChange={() => {}}
+															></Checkbox>
+														</TableCell>
+														<TableCell className="text-gray-300">
+															{matter}
+														</TableCell>
+														<TableCell>
+															<Text>{subTopic}</Text>
+														</TableCell>
+														<TableCell>{isLate}</TableCell>
+														<TableCell>
+															{item.data.studyComment || "-"}
+														</TableCell>
+														<TableCell>
+															Revisão de {revisionDay} dias ({item.revision}º) -
+															Estudado a {item.revisionDiff} dias atrás
+														</TableCell>
+														<TableCell>{date}</TableCell>
+														<TableCell>{badge}</TableCell>
+													</TableRow>
 												);
-											} else {
-												isLate = (
-													<BadgeDelta deltaType="increase">
-														Para hoje
-													</BadgeDelta>
-												);
 											}
-
-											return (
-												<TableRow
-													className="hover:bg-gray-200 hover:bg-opacity-10"
-													key={matter + id}
-												>
-													<TableCell>
-														<Checkbox
-															className="rounded-md p-2 mr-8 bg-gray-300 text-black border-0"
-															onCheckedChange={() => {}}
-														></Checkbox>
-													</TableCell>
-													<TableCell className="text-gray-300">
-														{matter}
-													</TableCell>
-													<TableCell>
-														<Text>{subTopic}</Text>
-													</TableCell>
-													<TableCell>{isLate}</TableCell>
-													<TableCell>{item.data.studyComment || "-"}</TableCell>
-													<TableCell>
-														Revisão de {revisionDay} dias ({item.revision}º) -
-														Estudado a {item.revisionDiff} dias atrás
-													</TableCell>
-													<TableCell>{date}</TableCell>
-													<TableCell>{badge}</TableCell>
-												</TableRow>
-											);
-										})}
+										)}
 									</TableBody>
 								</Table>
 							</div>
