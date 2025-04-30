@@ -186,7 +186,7 @@ export default function dashboard({
 								color: "white",
 							}}
 						>
-							{Math.round(studyCertain / (studyError + studyCertain))}%
+							{Math.round((studyCertain / (studyError + studyCertain))*100)}%
 						</Metric>
 					</Card>
 
