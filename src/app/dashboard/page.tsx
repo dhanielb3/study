@@ -288,7 +288,7 @@ export default function Home() {
 	const [usersStatus, setUsersStatus] = useState<
 		{ userId: string; status: string }[]
 	>([]);
-	const [tab, setTab] = useState("social");
+	const [tab, setTab] = useState<"individual" | "social">("social");
 
 	const changeTab = () => {
 		if (tab == "individual") {
@@ -568,7 +568,7 @@ export default function Home() {
 										</Select>
 									</div>
 									<div className="w-screen flex">
-										{tab == "individual" ? (
+										{tab !== "social" ? (
 											<button
 												className="bg-green-700 mr-[1vw] w-[5vw] h-[4vh] rounded-md border-2 border-green-800"
 												onClick={changeTab}
@@ -583,7 +583,7 @@ export default function Home() {
 												Pessoal
 											</button>
 										)}
-										{tab !== "individual" ? (
+										{tab == "social" ? (
 											<button
 												className="bg-green-700 w-[5vw] h-[4vh] rounded-md border-2 border-green-800"
 												onClick={changeTab}
