@@ -32,6 +32,7 @@ import { ptBR } from "date-fns/locale";
 import React from "react";
 import Create from "@/components/create";
 import { Editor, Viewer } from "@bytemd/react";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { formatDistanceToNow, differenceInDays } from "date-fns";
 
@@ -88,18 +89,75 @@ const plugins = [
 ];
 
 const options = {
+	responsive: true,
 	plugins: {
 		legend: {
-			position: "bottom",
+			position: "top", // ou "bottom", se preferir
+			labels: {
+				boxWidth: 12,
+				font: {
+					size: 10,
+				},
+			},
+		},
+		datalabels: {
+			display: true,
+			formatter: (value, context) => {
+				// Formatar os valores para mostrar os dados reais (não multiplicados)
+				const datasetIndex = context.datasetIndex;
+				if (datasetIndex === 0) return horasEstudo[context.dataIndex]; // Horas reais
+				if (datasetIndex === 1) return acertos[context.dataIndex]; // Acertos reais
+				if (datasetIndex === 2) return erros[context.dataIndex]; // Erros reais
+				if (datasetIndex === 3) return trofeus[context.dataIndex]; // Troféus reais
+				return value;
+			},
+			color: '#000', // Cor do texto dos valores
+			font: {
+				size: 10,
+			},
 		},
 	},
-	responsive: true,
 	scales: {
 		x: {
-			stacked: true,
+			ticks: {
+				font: {
+					size: 10,
+				},
+				color: "#666",
+			},
+			grid: {
+				display: false,
+			},
 		},
-		y: {
-			stacked: true,
+		y1: {
+			type: "linear",
+			position: "left",
+			stacked: false,
+			ticks: {
+				font: {
+					size: 10,
+				},
+				color: "#666",
+				beginAtZero: true,
+			},
+			grid: {
+				drawOnChartArea: false,
+			},
+		},
+		y2: {
+			type: "linear",
+			position: "right",
+			stacked: false,
+			ticks: {
+				font: {
+					size: 10,
+				},
+				color: "#666",
+				beginAtZero: true,
+			},
+			grid: {
+				drawOnChartArea: false,
+			},
 		},
 	},
 };
@@ -161,13 +219,15 @@ async function getStaticPropsTrophs() {
 	return jsonTrophs.data;
 }
 
-async function getStaticPropsStats() {
+async function getStaticPropsStats(user: string) {
 	const response = await fetch(`${BASE_URL}/api/find/stats`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({}),
+		body: JSON.stringify({
+			email: user,
+		}),
 	});
 
 	const jsonStats = await response.json();
@@ -316,7 +376,6 @@ export default function Home() {
 		const fetchData = async () => {
 			propsStudy = await getStaticPropsStudy();
 			propsTrophs = await getStaticPropsTrophs();
-			propsStats = await getStaticPropsStats();
 			propsCommentaries = await getStaticPropsCommentaries();
 			propsStatus = await getStaticPropsStatus();
 
@@ -340,35 +399,83 @@ export default function Home() {
 				);
 
 				setLastStudy(studiesByUser[studiesByUser.length - 1]);
+
+				propsStats = await getStaticPropsStats(session?.user?.email);
 				setStats(propsStats);
 
 				if (studiesByUser?.length > 0) {
-					const labels = studiesByUser.map((item: any, id: number) =>
-						(id + 1).toString()
+					const labels = studiesByUser
+						.map((item: any, id: number) =>
+							(studiesByUser.length - id).toString()
+						)
+						.reverse()
+						.slice(0, 7);
+					const horasEstudo = studiesByUser
+						.map((item: any) => Math.round(item.time / 60))
+						.reverse()
+						.slice(0, 7);
+					const acertos = studiesByUser
+						.map((item: any) => item.certain)
+						.reverse()
+						.slice(0, 7);
+					const erros = studiesByUser
+						.map((item: any) => item.errors)
+						.reverse()
+						.slice(0, 7);
+					const totalHoras = horasEstudo.reduce(
+						(accumulator: number, currentValue: number) =>
+							accumulator + currentValue,
+						0
 					);
-					const horasEstudo = studiesByUser.map((item: any) =>
-						Math.floor(item.time / 60)
+					const totalAcertos = acertos.reduce(
+						(accumulator: number, currentValue: number) =>
+							accumulator + currentValue,
+						0
 					);
-					const acertos = studiesByUser.map((item: any) => item.certain);
-					const erros = studiesByUser.map((item: any) => item.errors);
+					const totalErros = erros.reduce(
+						(accumulator: number, currentValue: number) =>
+							accumulator + currentValue,
+						0
+					);
+					const trofeus = studiesByUser
+						.slice(-7) // últimos 7
+						.reverse()
+						.map(
+							(item: any) =>
+								item.certain * 15 -
+								item.errors * 10 +
+								Math.round(item.time / 60) * 90
+						);
+					const totalTrofeus = trofeus.reduce((a, b) => a + b, 0);
 
 					const data = {
-						labels,
+						labels: [...labels, "TOTAL SEMANAL"],
 						datasets: [
 							{
-								label: "Horas de estudo",
-								data: horasEstudo,
+								label: "Horas de estudo (x20)",
+								data: [...horasEstudo, totalHoras].map(h => h * 20),
 								backgroundColor: "rgb(255, 99, 132)",
+								yAxisID: "y1",
 							},
 							{
-								label: "Acertos",
-								data: acertos,
+								label: "Acertos (x10)",
+								data: [...acertos, totalAcertos].map(a => a * 10),
 								backgroundColor: "rgb(75, 192, 192)",
+								yAxisID: "y1",
 							},
 							{
-								label: "Erros",
-								data: erros,
+								label: "Erros (x10)",
+								data: [...erros, totalErros].map(e => e * 10),
 								backgroundColor: "rgb(53, 162, 235)",
+								yAxisID: "y1",
+							},
+							{
+								label: "Troféus",
+								data: [...trofeus, totalTrofeus],
+								backgroundColor: "rgba(255, 205, 86, 0.6)",
+								borderColor: "rgb(255, 205, 86)",
+								borderWidth: 1,
+								yAxisID: "y2",
 							},
 						],
 					};
@@ -1316,9 +1423,9 @@ export default function Home() {
 									return maxStreak;
 								})()}
 								studyData={(() => {
-									const filteredStudy = study.filter(
-										(item) => item.user.email === session?.user?.email
-									).reverse(); // Filtra os estudos pelo usuário
+									const filteredStudy = study
+										.filter((item) => item.user.email === session?.user?.email)
+										.reverse(); // Filtra os estudos pelo usuário
 
 									return filteredStudy.map((item) => {
 										const { title, time, certain, errors, date, description } =
@@ -1326,9 +1433,6 @@ export default function Home() {
 
 										// Formata o tempo em horas e minutos
 										const timeInMinutes = parseInt(time, 10);
-
-										// Calcula o total de erros
-										const totalErrors = certain + errors;
 
 										// Adiciona um badge baseado na quantidade de erros
 										const total = certain + errors;
