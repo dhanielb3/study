@@ -437,7 +437,7 @@ export default function Home() {
 								item.errors * 10 +
 								Math.round(item.time / 60) * 90
 						);
-					const totalTrofeus = trofeus.reduce((a, b) => a + b, 0);
+					const totalTrofeus = trofeus.reduce((a: number, b: number) => a + b, 0);
 
 					const data = {
 						labels: [...labels, "TOTAL SEMANAL"],
