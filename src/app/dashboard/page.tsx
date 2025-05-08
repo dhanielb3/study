@@ -102,15 +102,6 @@ const options = {
 		},
 		datalabels: {
 			display: true,
-			formatter: (value, context) => {
-				// Formatar os valores para mostrar os dados reais (não multiplicados)
-				const datasetIndex = context.datasetIndex;
-				if (datasetIndex === 0) return horasEstudo[context.dataIndex]; // Horas reais
-				if (datasetIndex === 1) return acertos[context.dataIndex]; // Acertos reais
-				if (datasetIndex === 2) return erros[context.dataIndex]; // Erros reais
-				if (datasetIndex === 3) return trofeus[context.dataIndex]; // Troféus reais
-				return value;
-			},
 			color: '#000', // Cor do texto dos valores
 			font: {
 				size: 10,
