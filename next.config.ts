@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  productionBrowserSourceMaps: false,
+  reactStrictMode: false,
   env: {
     DATABASE_URL: "postgresql://neondb_owner:npg_t9uwZUz4yofb@ep-plain-bush-a5ogzpwi-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require",
     EMAIL_SERVER_HOST: "smtp.gmail.com",

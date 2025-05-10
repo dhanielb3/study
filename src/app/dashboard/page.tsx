@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { Ref, RefObject, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
@@ -32,7 +32,8 @@ import { ptBR } from "date-fns/locale";
 import React from "react";
 import Create from "@/components/create";
 import { Editor, Viewer } from "@bytemd/react";
-import ChartDataLabels from "chartjs-plugin-datalabels";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 import { formatDistanceToNow, differenceInDays } from "date-fns";
 
@@ -47,8 +48,13 @@ import byteMDLocale from "bytemd/locales/pt_BR.json";
 import "bytemd/dist/index.css";
 import "./bytemd-dark.css";
 import "katex/dist/katex.css";
-import { Badge } from "@tremor/react";
 import DashboardInfo from "@/components/dashboardInfo";
+import { usePageLeave } from "react-use";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 function formatarTempoPassado(data: Date): string {
   const agora = new Date();
@@ -250,6 +256,7 @@ export default function Home() {
   );
   const [comments, setComments] = useState<
     {
+      id: string;
       studyId: string;
       userId: string;
       userName: string;
@@ -261,6 +268,53 @@ export default function Home() {
     { userId: string; status: string }[]
   >([]);
   const [tab, setTab] = useState<"individual" | "social">("social");
+  const [lastView, setLastView] = useState<number>(0);
+  const [firstView, setFirstView] = useState<number>(0);
+  const [notifications, setNotifications] = useState<
+    {
+      id: string;
+      text: string;
+      data: (typeof comments)[number];
+    }[]
+  >([]);
+  const commentRefs = useRef<{ [id: string]: React.RefObject<HTMLDivElement> }>(
+    {}
+  );
+  let newNotifications: {
+    id: string;
+    text: string;
+    data: (typeof comments)[number];
+  }[] = [];
+
+  useEffect(() => {
+    const now = Date.now();
+    setFirstView(now);
+    setLastView(Number(localStorage.getItem("lastView") || 0));
+  }, []);
+
+  usePageLeave(() => {
+    localStorage.setItem("lastView", Date.now().toString());
+  });
+
+  useEffect(() => {
+    const freshNotifications: typeof notifications = [];
+
+    comments.forEach((item, commentId) => {
+      const { text, date: dateComment } = item;
+
+      if (Number(new Date(dateComment)) > lastView) {
+        freshNotifications.push({
+          id: `notification-${Number(new Date(dateComment))}${text}`,
+          text: `${item.userName} comentou "${text}" ${formatarTempoPassado(
+            new Date()
+          )}`,
+          data: item,
+        });
+      }
+    });
+
+    setNotifications(freshNotifications);
+  }, [comments, lastView]);
 
   const changeTab = () => {
     if (tab == "individual") {
@@ -315,7 +369,7 @@ export default function Home() {
 
           // Extraindo dados sem reverse() para manter ordem cronológica
           const horasEstudo = last7.map((item: { time: number }) =>
-            Math.round(item.time / 60)
+            Math.ceil(item.time / 60)
           );
           const acertos = last7.map(
             (item: { certain: number }) => item.certain
@@ -354,27 +408,25 @@ export default function Home() {
                 label: "Horas de estudo",
                 data: [...horasEstudo, totalHoras],
                 backgroundColor: "rgb(255, 99, 132)",
-                stack: "stack1", // Adicionando grupo de stack
+                stack: "stack1",
               },
               {
                 label: "Acertos",
                 data: [...acertos, totalAcertos],
                 backgroundColor: "rgb(75, 192, 192)",
-                stack: "stack1", // Mesmo grupo de stack
+                stack: "stack1",
               },
               {
                 label: "Erros",
                 data: [...erros, totalErros],
                 backgroundColor: "rgb(53, 162, 235)",
-                stack: "stack1", // Mesmo grupo de stack
+                stack: "stack1",
               },
               {
                 label: "Troféus",
                 data: [...trofeus, totalTrofeus],
                 backgroundColor: "rgba(255, 205, 86, 0.6)",
-                stack: "stack2", // Grupo de stack diferente (opcional)
-                // Se quiser que os troféus apareçam em um eixo secundário:
-                yAxisID: "y1",
+                stack: "stack1",
               },
             ],
           };
@@ -413,6 +465,72 @@ export default function Home() {
               height={19}
               priority
             />
+            <Popover>
+              <PopoverTrigger asChild className="top-4 right-16 absolute">
+                <Button variant="ghost" className="h-9 px-3 rounded-lg">
+                  {notifications.length == 0 ? (
+                    <div></div>
+                  ) : (
+                    <span className="relative flex size-3">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex size-3 rounded-full bg-red-500"></span>
+                    </span>
+                  )}
+                  <Badge
+                    className={`mr-2 ${
+                      notifications.length == 0 ? "" : "bg-red-400"
+                    }`}
+                  >
+                    {notifications.length}
+                  </Badge>
+                  Notificações
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-60">
+                <div className="space-y-2">
+                  {notifications.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      Sem notificações.
+                    </p>
+                  ) : (
+                    notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className="p-2 bg-muted rounded-md text-sm flex justify-between items-center gap-2"
+                      >
+                        <span className="flex-1">{notification.text}</span>
+                        <button
+                          onClick={() => {
+                            // lógica para marcar como lido, ex: remover do estado
+                            setNotifications((prev) =>
+                              prev.filter((n) => n.id !== notification.id)
+                            );
+                          }}
+                          className="p-1 hover:bg-green-100 rounded transition"
+                          title="Marcar como lido"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4 text-green-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
           </header>
           {tab == "social" ? (
             <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -663,6 +781,7 @@ export default function Home() {
                           const percent = (certain * 100) / totalQuestions;
 
                           let commentStudy: {
+                            id: string;
                             studyId: string;
                             userId: string;
                             userName: string;
@@ -928,45 +1047,121 @@ export default function Home() {
                                 ) : null}
                                 <div className="p-4 rounded-md max-w-xl">
                                   <ul>
-                                    {commentStudy.map(
-                                      (
-                                        item: {
-                                          userId: string;
-                                          userName: string;
-                                          text: string;
-                                          date: Date;
-                                        },
-                                        commentId: number
-                                      ) => {
-                                        const {
-                                          userName,
-                                          text,
-                                          date: dateComment,
-                                        } = item;
+                                    {(() => {
+                                      const mappedComments = commentStudy.map(
+                                        (
+                                          item: {
+                                            studyId: string;
+                                            userId: string;
+                                            userName: string;
+                                            text: string;
+                                            date: Date;
+                                          },
+                                          commentId: number
+                                        ) => {
+                                          const {
+                                            userName,
+                                            text,
+                                            date: dateComment,
+                                          } = item;
 
-                                        return (
-                                          <li className="mt-4" key={commentId}>
-                                            <div className="flex items-center gap-2 mb-1">
-                                              <span className="bg-blue-100 text-blue-600 text-sm font-semibold px-2 py-1 rounded">
-                                                {userName}
-                                              </span>
-                                              <span className="text-gray-500 text-xs">
-                                                {formatarTempoPassado(
-                                                  new Date(
-                                                    //@ts-ignore
-                                                    dateComment
-                                                  )
-                                                )}
-                                              </span>
-                                            </div>
-                                            <Viewer
-                                              plugins={plugins}
-                                              value={text}
-                                            ></Viewer>
-                                          </li>
-                                        );
-                                      }
-                                    )}
+                                          return (
+                                            <li
+                                              className={`mt-4 ${
+                                                notifications.some(
+                                                  (n) =>
+                                                    n.data.text === text &&
+                                                    Number(
+                                                      new Date(n.data.date)
+                                                    ) ===
+                                                      Number(
+                                                        new Date(dateComment)
+                                                      )
+                                                )
+                                                  ? "bg-gray-600 rounded-md px-8 py-2"
+                                                  : ""
+                                              }`}
+                                              key={commentId}
+                                            >
+                                              <div
+                                                ref={
+                                                  commentRefs.current[
+                                                    `notification-${Number(
+                                                      new Date(dateComment)
+                                                    )}${text}`
+                                                  ]
+                                                }
+                                                className="flex items-center justify-between gap-2 mb-1"
+                                              >
+                                                <div className="flex items-center gap-2">
+                                                  <span className="bg-blue-100 text-blue-600 text-sm font-semibold px-2 py-1 rounded">
+                                                    {userName}
+                                                  </span>
+                                                  <span className="text-gray-500 text-xs">
+                                                    {formatarTempoPassado(
+                                                      new Date(dateComment)
+                                                    )}
+                                                  </span>
+                                                </div>
+                                                <button
+                                                  onClick={() => {
+                                                    async function deleteComment() {
+                                                      await fetch(
+                                                        "/api/delete/comment",
+                                                        {
+                                                          method: "POST",
+                                                          headers: {
+                                                            "Content-Type":
+                                                              "application/json",
+                                                          },
+                                                          body: JSON.stringify({
+                                                            filter: {
+                                                              where: { id: id },
+                                                            },
+                                                          }),
+                                                        }
+                                                      );
+
+                                                      alert(
+                                                        "Deletando comentário..."
+                                                      );
+
+                                                      //window.location.href =
+                                                      //  window.location.href;
+                                                    }
+
+                                                    deleteComment();
+                                                  }}
+                                                  className="text-red-600 hover:bg-red-100 p-1 rounded transition"
+                                                  title="Deletar comentário"
+                                                >
+                                                  <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="w-4 h-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    strokeWidth={2}
+                                                  >
+                                                    <path
+                                                      strokeLinecap="round"
+                                                      strokeLinejoin="round"
+                                                      d="M6 18L18 6M6 6l12 12"
+                                                    />
+                                                  </svg>
+                                                </button>
+                                              </div>
+                                              <Viewer
+                                                plugins={plugins}
+                                                value={text}
+                                              ></Viewer>
+                                            </li>
+                                          );
+                                        }
+                                      );
+
+                                      return <div>{mappedComments}</div>;
+                                    })()}
                                   </ul>
                                 </div>
                               </div>
