@@ -1056,6 +1056,7 @@ export default function Home() {
                                             userName: string;
                                             text: string;
                                             date: Date;
+                                            id: string;
                                           },
                                           commentId: number
                                         ) => {
@@ -1063,6 +1064,7 @@ export default function Home() {
                                             userName,
                                             text,
                                             date: dateComment,
+                                            id: idComment,
                                           } = item;
 
                                           return (
@@ -1116,7 +1118,7 @@ export default function Home() {
                                                           },
                                                           body: JSON.stringify({
                                                             filter: {
-                                                              where: { id: id },
+                                                              where: { id: idComment },
                                                             },
                                                           }),
                                                         }
