@@ -1126,8 +1126,8 @@ export default function Home() {
                                                         "Deletando comentário..."
                                                       );
 
-                                                      //window.location.href =
-                                                      //  window.location.href;
+                                                      window.location.href =
+                                                        window.location.href;
                                                     }
 
                                                     deleteComment();
