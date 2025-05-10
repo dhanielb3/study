@@ -89,71 +89,21 @@ const plugins = [
 ];
 
 const options = {
-  responsive: true,
   plugins: {
     legend: {
-      position: "top", // ou "bottom", se preferir
-      labels: {
-        boxWidth: 12,
-        font: {
-          size: 10,
-        },
-      },
-    },
-    datalabels: {
-      display: true,
-      color: "#000", // Cor do texto dos valores
-      font: {
-        size: 10,
-      },
+      position: "bottom",
     },
   },
+  responsive: true,
   scales: {
     x: {
-      ticks: {
-        font: {
-          size: 10,
-        },
-        color: "#666",
-      },
-      grid: {
-        display: false,
-      },
+      stacked: true,
     },
-    y1: {
-      type: "linear",
-      position: "left",
-      stacked: false,
-      ticks: {
-        font: {
-          size: 10,
-        },
-        color: "#666",
-        beginAtZero: true,
-      },
-      grid: {
-        drawOnChartArea: false,
-      },
-    },
-    y2: {
-      type: "linear",
-      position: "right",
-      stacked: false,
-      ticks: {
-        font: {
-          size: 10,
-        },
-        color: "#666",
-        beginAtZero: true,
-      },
-      grid: {
-        drawOnChartArea: false,
-      },
+    y: {
+      stacked: true,
     },
   },
 };
-
-const labels = ["SEG", "TER", "QUA", "QUI", "SEX", "SAB", "DOM"];
 
 function formatDate(dataISO: string): string {
   const data = parseISO(dataISO);
@@ -193,21 +143,6 @@ async function getStaticPropsStudy() {
 
   const jsonStudy = await responseStudy.json();
   return jsonStudy.data;
-}
-
-async function getStaticPropsTrophs() {
-  let responseTrophs = await fetch(`${BASE_URL}/api/find/trophs`, {
-    method: "POST",
-    body: JSON.stringify({
-      filter: {},
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  const jsonTrophs = await responseTrophs.json();
-  return jsonTrophs.data;
 }
 
 async function getStaticPropsStats(user: string) {
@@ -279,20 +214,6 @@ export default function Home() {
     }[]
   >([]);
   const [filter, setFilter] = useState("todos");
-  const [trophs, setTrophs] = useState<
-    {
-      id: string;
-      userId: string;
-      date: string | null;
-      trophs: number;
-      user: {
-        id: string;
-        name: string;
-        email: string;
-        image: string;
-      };
-    }[]
-  >([]);
   const [stats, setStats] = useState<{
     certain: number;
     errors: number;
@@ -359,30 +280,21 @@ export default function Home() {
 
   useEffect(() => {
     let propsStudy;
-    let propsTrophs;
     let propsStats;
     let propsCommentaries;
     let propsStatus;
 
     const fetchData = async () => {
       propsStudy = await getStaticPropsStudy();
-      propsTrophs = await getStaticPropsTrophs();
       propsCommentaries = await getStaticPropsCommentaries();
       propsStatus = await getStaticPropsStatus();
 
       setStudy(propsStudy);
-      setTrophs(propsTrophs);
       setComments(propsCommentaries);
       setUsersStatus(propsStatus);
 
       //filtrar usuário
       if (session?.user?.email) {
-        // --- STUDY ---
-        propsStudy.filter((item: { userId: string | null | undefined }) => {
-          return item.userId !== session?.user?.email;
-        });
-
-        // --- TROPHS ---
         let studiesByUser = propsStudy.filter(
           (item: { userId: string | null | undefined }) => {
             return item.userId == session?.user?.email;
@@ -395,112 +307,79 @@ export default function Home() {
         setStats(propsStats);
 
         if (studiesByUser?.length > 0) {
-          const labels = studiesByUser
-            .map((item: any, id: number) =>
-              (studiesByUser.length - id).toString()
-            )
-            .reverse()
-            .slice(0, 7);
-          const horasEstudo = studiesByUser
-            .map((item: any) => Math.round(item.time / 60))
-            .reverse()
-            .slice(0, 7);
-          const acertos = studiesByUser
-            .map((item: any) => item.certain)
-            .reverse()
-            .slice(0, 7);
-          const erros = studiesByUser
-            .map((item: any) => item.errors)
-            .reverse()
-            .slice(0, 7);
+          const last7 = studiesByUser.slice(-7); // Últimos 7 dias
+
+          // Simplificando a criação dos labels para dias da semana
+          const weekDays = ["SEG", "TER", "QUA", "QUI", "SEX", "SAB", "DOM"];
+          const labels = weekDays.slice(0, last7.length);
+
+          // Extraindo dados sem reverse() para manter ordem cronológica
+          const horasEstudo = last7.map((item: { time: number }) =>
+            Math.round(item.time / 60)
+          );
+          const acertos = last7.map(
+            (item: { certain: number }) => item.certain
+          );
+          const erros = last7.map((item: { errors: number }) => item.errors);
+          const trofeus = last7.map(
+            (item: { certain: number; errors: number; time: number }) =>
+              item.certain * 15 -
+              item.errors * 10 +
+              Math.round(item.time / 60) * 90
+          );
+
+          // Calculando totais
           const totalHoras = horasEstudo.reduce(
-            (accumulator: number, currentValue: number) =>
-              accumulator + currentValue,
+            (acc: number, val: number) => acc + val,
             0
           );
           const totalAcertos = acertos.reduce(
-            (accumulator: number, currentValue: number) =>
-              accumulator + currentValue,
+            (acc: number, val: number) => acc + val,
             0
           );
           const totalErros = erros.reduce(
-            (accumulator: number, currentValue: number) =>
-              accumulator + currentValue,
+            (acc: number, val: number) => acc + val,
             0
           );
-          const trofeus = studiesByUser
-            .slice(-7) // últimos 7
-            .reverse()
-            .map(
-              (item: any) =>
-                item.certain * 15 -
-                item.errors * 10 +
-                Math.round(item.time / 60) * 90
-            );
           const totalTrofeus = trofeus.reduce(
-            (a: number, b: number) => a + b,
+            (acc: number, val: number) => acc + val,
             0
           );
 
+          // Criando os dados do gráfico
           const data = {
             labels: [...labels, "TOTAL SEMANAL"],
             datasets: [
               {
-                label: "Horas de estudo (x20)",
-                data: [...horasEstudo, totalHoras].map((h) => h * 20),
+                label: "Horas de estudo",
+                data: [...horasEstudo, totalHoras],
                 backgroundColor: "rgb(255, 99, 132)",
-                yAxisID: "y1",
+                stack: "stack1", // Adicionando grupo de stack
               },
               {
-                label: "Acertos (x10)",
-                data: [...acertos, totalAcertos].map((a) => a * 10),
+                label: "Acertos",
+                data: [...acertos, totalAcertos],
                 backgroundColor: "rgb(75, 192, 192)",
-                yAxisID: "y1",
+                stack: "stack1", // Mesmo grupo de stack
               },
               {
-                label: "Erros (x10)",
-                data: [...erros, totalErros].map((e) => e * 10),
+                label: "Erros",
+                data: [...erros, totalErros],
                 backgroundColor: "rgb(53, 162, 235)",
-                yAxisID: "y1",
+                stack: "stack1", // Mesmo grupo de stack
               },
               {
                 label: "Troféus",
                 data: [...trofeus, totalTrofeus],
                 backgroundColor: "rgba(255, 205, 86, 0.6)",
-                borderColor: "rgb(255, 205, 86)",
-                borderWidth: 1,
-                yAxisID: "y2",
+                stack: "stack2", // Grupo de stack diferente (opcional)
+                // Se quiser que os troféus apareçam em um eixo secundário:
+                yAxisID: "y1",
               },
             ],
           };
 
-          setChartData(
-            data || {
-              labels: [],
-              datasets: [
-                {
-                  label: "Horas de estudo",
-                  data: [],
-                  backgroundColor: "rgb(255, 99, 132)",
-                },
-                {
-                  label: "Acertos",
-                  data: [],
-                  backgroundColor: "rgb(75, 192, 192)",
-                },
-                {
-                  label: "Erros",
-                  data: [],
-                  backgroundColor: "rgb(53, 162, 235)",
-                },
-              ],
-            }
-          );
-        } else {
-          console.warn(
-            "Nenhum dado retornado de /api/find/study",
-            studiesByUser
-          );
+          setChartData(data);
         }
 
         // --- STATS ---
@@ -769,7 +648,6 @@ export default function Home() {
                         .map((activy, id) => {
                           const {
                             id: activyId,
-                            userId,
                             title,
                             certain,
                             description,
@@ -783,8 +661,6 @@ export default function Home() {
 
                           const totalQuestions = certain + errors;
                           const percent = (certain * 100) / totalQuestions;
-                          const isToday =
-                            new Date(date).toDateString() === today;
 
                           let commentStudy: {
                             studyId: string;
@@ -1063,7 +939,6 @@ export default function Home() {
                                         commentId: number
                                       ) => {
                                         const {
-                                          userId,
                                           userName,
                                           text,
                                           date: dateComment,
