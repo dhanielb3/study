@@ -974,10 +974,23 @@ export default function Home() {
                                 </code>
                                 {photo ? (
                                   (() => {
-                                    const extension = photo
+                                    let extension = photo
                                       .split(".")
                                       .pop()
                                       ?.toLowerCase();
+
+                                    // Se não tiver extensão, tenta adivinhar por padrão do domínio
+                                    if (
+                                      !extension ||
+                                      !extension.match(/^[a-z0-9]{2,4}$/)
+                                    ) {
+                                      if (photo.includes("ucarecdn.com")) {
+                                        // suposição padrão do seu uso — pode ajustar
+                                        extension = "jpg"; // ou "mp4", "mp3", etc. conforme necessário
+                                      } else {
+                                        extension = "";
+                                      }
+                                    }
 
                                     if (
                                       [
@@ -986,7 +999,7 @@ export default function Home() {
                                         "png",
                                         "webp",
                                         "gif",
-                                      ].includes(extension || "")
+                                      ].includes(extension)
                                     ) {
                                       return (
                                         <Image
