@@ -266,7 +266,7 @@ export default function EstudoForm() {
 						<div className="col-span-3 w-full p-4 rounded-xl">
 							<Input
 								type="file"
-								accept="image/*"
+								accept="image/*,video/*,audio/*"
 								onChange={(e) => {
 									const file = e.target.files?.[0];
 									if (file) {
