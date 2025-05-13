@@ -291,21 +291,15 @@ export default function EstudoForm() {
               />
               {photo &&
                 (() => {
-                  let extension = photo.split(".").pop()?.toLowerCase();
+                  let mediaType = "";
 
-                  // Se não tiver extensão ou for inválida, tenta inferir
-                  if (!extension || !extension.match(/^[a-z0-9]{2,4}$/)) {
-                    if (photo.includes("ucarecdn.com")) {
-                      // Ajuste aqui conforme o tipo padrão que você costuma subir no Uploadcare
-                      extension = "jpg"; // ou "mp4", "mp3"
-                    } else {
-                      extension = "";
-                    }
+                  // Tenta extrair o tipo do base64: "image/png", "video/mp4", etc.
+                  const match = photo.match(/^data:(.*?);base64,/);
+                  if (match) {
+                    mediaType = match[1]; // ex: "image/png"
                   }
 
-                  if (
-                    ["jpg", "jpeg", "png", "webp", "gif"].includes(extension)
-                  ) {
+                  if (mediaType.startsWith("image/")) {
                     return (
                       <Image
                         src={photo}
@@ -313,12 +307,12 @@ export default function EstudoForm() {
                         height={600}
                         className="w-[30vw] mt-[3vh] object-contain"
                         alt="Media"
-                        unoptimized // necessário se usar domínio externo como Uploadcare
+                        unoptimized
                       />
                     );
                   }
 
-                  if (extension === "mp4") {
+                  if (mediaType === "video/mp4") {
                     return (
                       <video controls className="w-[30vw] mt-[3vh] rounded">
                         <source src={photo} type="video/mp4" />
@@ -327,10 +321,10 @@ export default function EstudoForm() {
                     );
                   }
 
-                  if (extension === "mp3") {
+                  if (mediaType === "audio/mp3" || mediaType === "audio/mpeg") {
                     return (
                       <audio controls className="mt-[3vh] w-[30vw]">
-                        <source src={photo} type="audio/mp3" />
+                        <source src={photo} type={mediaType} />
                         Seu navegador não suporta áudio.
                       </audio>
                     );
@@ -338,7 +332,7 @@ export default function EstudoForm() {
 
                   return (
                     <div className="text-red-500 mt-4">
-                      Formato de mídia não suportado
+                      Tipo de mídia não suportado
                     </div>
                   );
                 })()}
