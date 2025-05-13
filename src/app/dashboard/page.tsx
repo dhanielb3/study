@@ -277,6 +277,7 @@ export default function Home() {
       data: (typeof comments)[number];
     }[]
   >([]);
+  const [readNotifications, setReadNotifications] = useState<string[]>([]);
   const commentRefs = useRef<{ [id: string]: React.RefObject<HTMLDivElement> }>(
     {}
   );
@@ -285,6 +286,13 @@ export default function Home() {
     text: string;
     data: (typeof comments)[number];
   }[] = [];
+
+  useEffect(() => {
+    const saved = localStorage.getItem("readNotifications");
+    if (saved) {
+      setReadNotifications(JSON.parse(saved));
+    }
+  }, []);
 
   useEffect(() => {
     const now = Date.now();
@@ -301,10 +309,15 @@ export default function Home() {
 
     comments.forEach((item, commentId) => {
       const { text, date: dateComment } = item;
+      const dateNumber = Number(new Date(dateComment));
+      const notificationId = `notification-${dateNumber}${text}`;
 
-      if (Number(new Date(dateComment)) > lastView) {
+      const isNew =
+        dateNumber > lastView && !readNotifications.includes(notificationId);
+
+      if (isNew) {
         freshNotifications.push({
-          id: `notification-${Number(new Date(dateComment))}${text}`,
+          id: notificationId,
           text: `${item.userName} comentou "${text}" ${formatarTempoPassado(
             new Date()
           )}`,
@@ -314,7 +327,15 @@ export default function Home() {
     });
 
     setNotifications(freshNotifications);
-  }, [comments, lastView]);
+  }, [comments, lastView, readNotifications]);
+
+  function markAsRead(notificationId: string) {
+    setReadNotifications((prev) => {
+      const updated = [...prev, notificationId];
+      localStorage.setItem("readNotifications", JSON.stringify(updated));
+      return updated;
+    });
+  }
 
   const changeTab = () => {
     if (tab == "individual") {
@@ -502,7 +523,7 @@ export default function Home() {
                         <span className="flex-1">{notification.text}</span>
                         <button
                           onClick={() => {
-                            // lógica para marcar como lido, ex: remover do estado
+                            markAsRead(notification.id);
                             setNotifications((prev) =>
                               prev.filter((n) => n.id !== notification.id)
                             );
@@ -952,16 +973,71 @@ export default function Home() {
                                     "esta pessoa não é criativa... não coloca nem descrição (nada aqui...)"}
                                 </code>
                                 {photo ? (
-                                  <Image
-                                    src={photo || ""}
-                                    width={600}
-                                    height={600}
-                                    objectFit="contain"
-                                    className="w-[30vw] mt-[3vh]"
-                                    alt=""
-                                  ></Image>
+                                  (() => {
+                                    const extension = photo
+                                      .split(".")
+                                      .pop()
+                                      ?.toLowerCase();
+
+                                    if (
+                                      [
+                                        "jpg",
+                                        "jpeg",
+                                        "png",
+                                        "webp",
+                                        "gif",
+                                      ].includes(extension || "")
+                                    ) {
+                                      return (
+                                        <Image
+                                          src={photo}
+                                          width={600}
+                                          height={600}
+                                          objectFit="contain"
+                                          className="w-[30vw] mt-[3vh]"
+                                          alt="Media"
+                                        />
+                                      );
+                                    }
+
+                                    if (extension === "mp4") {
+                                      return (
+                                        <video
+                                          controls
+                                          className="w-[30vw] mt-[3vh] rounded"
+                                        >
+                                          <source
+                                            src={photo}
+                                            type="video/mp4"
+                                          />
+                                          Seu navegador não suporta vídeos.
+                                        </video>
+                                      );
+                                    }
+
+                                    if (extension === "mp3") {
+                                      return (
+                                        <audio
+                                          controls
+                                          className="mt-[3vh] w-[30vw]"
+                                        >
+                                          <source
+                                            src={photo}
+                                            type="audio/mp3"
+                                          />
+                                          Seu navegador não suporta áudio.
+                                        </audio>
+                                      );
+                                    }
+
+                                    return (
+                                      <div className="text-red-500 mt-4">
+                                        Formato não suportado
+                                      </div>
+                                    );
+                                  })()
                                 ) : (
-                                  <div></div>
+                                  <div />
                                 )}
                               </div>
                               <div className="mx-[1vw] transition-all">
@@ -1118,7 +1194,9 @@ export default function Home() {
                                                           },
                                                           body: JSON.stringify({
                                                             filter: {
-                                                              where: { id: idComment },
+                                                              where: {
+                                                                id: idComment,
+                                                              },
                                                             },
                                                           }),
                                                         }
