@@ -972,21 +972,21 @@ export default function Home() {
                                   )) ||
                                     "esta pessoa não é criativa... não coloca nem descrição (nada aqui...)"}
                                 </code>
-                                {photo ? (
+                                {photo &&
                                   (() => {
                                     let extension = photo
                                       .split(".")
                                       .pop()
                                       ?.toLowerCase();
 
-                                    // Se não tiver extensão, tenta adivinhar por padrão do domínio
+                                    // Se não tiver extensão ou for inválida, tenta inferir
                                     if (
                                       !extension ||
                                       !extension.match(/^[a-z0-9]{2,4}$/)
                                     ) {
                                       if (photo.includes("ucarecdn.com")) {
-                                        // suposição padrão do seu uso — pode ajustar
-                                        extension = "jpg"; // ou "mp4", "mp3", etc. conforme necessário
+                                        // Ajuste aqui conforme o tipo padrão que você costuma subir no Uploadcare
+                                        extension = "jpg"; // ou "mp4", "mp3"
                                       } else {
                                         extension = "";
                                       }
@@ -1006,9 +1006,9 @@ export default function Home() {
                                           src={photo}
                                           width={600}
                                           height={600}
-                                          objectFit="contain"
-                                          className="w-[30vw] mt-[3vh]"
+                                          className="w-[30vw] mt-[3vh] object-contain"
                                           alt="Media"
+                                          unoptimized // necessário se usar domínio externo como Uploadcare
                                         />
                                       );
                                     }
@@ -1045,13 +1045,10 @@ export default function Home() {
 
                                     return (
                                       <div className="text-red-500 mt-4">
-                                        Formato não suportado
+                                        Formato de mídia não suportado
                                       </div>
                                     );
-                                  })()
-                                ) : (
-                                  <div />
-                                )}
+                                  })()}
                               </div>
                               <div className="mx-[1vw] transition-all">
                                 {!commentIsOpen[activyId] ? (
